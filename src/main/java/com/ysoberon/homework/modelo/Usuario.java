@@ -44,7 +44,12 @@ public class Usuario {
 		super();
 		this.id_usuario = id_usuario;
 	}
-
+   
+	
+	/***
+	 * Getters y setters
+	 * @return
+	 */
 
 	public Integer getId_usuario() {
 		return id_usuario;
