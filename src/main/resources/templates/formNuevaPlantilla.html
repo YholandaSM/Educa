@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">>
+<head>
+<meta charset="ISO-8859-1">
+
+ <link th:href="@{/css/bootstrap/bootstrap.min.css}" rel="stylesheet"
+	type="text/css" href="../static/css/bootstrap.min.css">
+  <!-- Custom styles for this template -->
+    <link th:href="@{/css/bootstrap/css/jumbotron.css}" rel="stylesheet">
+    <link th:href="@{/css/bootstrap/css/sticky-footer-navbar.css}" rel="stylesheet">
+    <link href="https://use.fontawesome.com/releases/v5.5.0/css/all.css" rel="stylesheet">
+    
+      <header th:insert="fragments/cabecera.html :: cabecera"></header>
+<title>Nueva Plantilla</title>
+
+<div class="container">
+	<form th:action="@{/guardarPlantilla}" method="post"  th:object="${plantilla}" enctype="multipart/form-data">
+	
+	 
+	   <div class="col-md-3"> 
+                  <div class="form-group">
+                    <label for="nombre">Nombre</label>
+                     <input type="hidden" th:field="*{id_plantilla}">
+                 
+                    <input type="text" th:field="*{nombre}" class="form-control" id="nombre" name="nombre" placeholder="Nombre de la plantilla" required="required">
+                  </div>
+                </div>
+                  <div class="row">
+                  <div class="col-md-3"> 
+                  <div class="form-group">
+                    <label for="categoria">Alumnos</label>
+                    <select class="form-control" name="alumno" th:field="*{alumno.id_alumno}" id="alumno">
+                      <option th:each="alumno : ${alumnos}" 
+								th:value="${alumno.id_alumno}"
+								th:text="${alumno.nombre}">
+					  </option>
+                    </select>
+                  </div>
+                </div>
+                
+                <div class="col-md-3"> 
+                  <div class="form-group">
+                    <label for="categoria">Categoría</label>
+                    <select class="form-control" name="categoria" th:field="*{categoria.id_categoria}" id="categoria">
+                      <option th:each="categoria : ${categorias}" 
+								th:value="${categoria.id_categoria}"
+								th:text="${categoria.nombre}">
+					  </option>
+                    </select>
+                  </div>
+                </div>
+                
+                <div class="col-md-3"> 
+                  <div class="form-group">
+                    <label for="categoria">Curso</label>
+                    <select class="form-control" name="curso" th:field="*{curso.id_curso}" id="curso">
+                      <option th:each="curso : ${cursos}" 
+								th:value="${curso.id_curso}"
+								th:text="${curso.nombre}">
+					  </option>
+                    </select>
+                  </div>
+                </div>
+                
+                 <div class="form-group">
+                    <label for="nombre">Detalles</label>
+                     <input type="hidden" th:field="*{id_plantilla}">
+                 
+                    <input type="text" th:field="*{detalles}" class="form-control" id="detalles" name="detalles" placeholder="Detalles de la plantilla" required="required">
+                  </div>
+                
+              
+                 
+    </div>
+    
+    	 <input class="btn btn-primary" type="submit" value="Guardar">
+	
+	</form>
+
+</div>
+</head>
+<body>
+
+</body>
+</html>

@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+
+<head>
+<meta charset="utf-8">
+<!-- Bootstrap CSS -->
+<link th:href="@{/css/bootstrap/bootstrap.min.css}" rel="stylesheet"
+	type="text/css" href="../static/css/bootstrap.min.css">
+  <!-- Custom styles for this template -->
+    <link th:href="@{/bootstrap/css/jumbotron.css}" rel="stylesheet">
+    <link th:href="@{/bootstrap/css/sticky-footer-navbar.css}" rel="stylesheet">
+    <link href="https://use.fontawesome.com/releases/v5.5.0/css/all.css" rel="stylesheet">
+<title>Home</title>
+</head>
+<body>
+	<header th:insert="fragments/cabecera.html :: cabecera"></header>
+	<div class="container">
+		<br>
+	<span th:if="${session.usuario !=null}"  th:text="${session.usuario.nombre}"></span>&nbsp
+
+		<div th:if="${msg != null}" class='alert alert-success'
+			th:text="${msg}" role='alert'></div>
+		<table style="width: 100%" border="2">
+			<tr>
+			 	<span th:if="${session.usuario !=null}"  th:text="${session.usuario.nombre}"></span>&nbsp
+				<th>Nombre</th>
+				<th>Edad</th>
+				<th>Imagen</th>
+				<th>Operaciones</th>
+			</tr>
+			<tr th:each="alumno:${alumnos}">
+				<td th:text="${alumno.nombre}"></td>
+				<td th:text="${alumno.edad}"></td>
+				<td><img class="rounded mx-auto d-block"
+					th:src="@{/logos/{img}   (img=${alumno.imagen})}"
+					alt="Imagen alumno" width="50"></td>
+				<td>
+				<a th:href="@{/editarAlumno/{id} (id=${alumno.id_alumno})}" class="btn btn-success btn-sm" role="button" title="Editar"><i class="fas fa-pencil-alt" aria-hidden="true"></i></a>
+				<a th:href="@{/eliminarAlumno/{id} (id=${alumno.id_alumno})}" onclick="return confirm('¿Estás seguro?')"    class="btn btn-success btn-sm" role="button" title="Eliminar"><i class="fas fa-trash" aria-hidden="true"></i></a>
+				
+				</td>
+			</tr>
+			<tr>
+		</table>
+
+
+		<br>
+		<br>
+		<a th:href="@{/nuevoAlumno}" class=" btn btn-primary">Nuevo alumno</a>
+		<a th:href="@{/nuevaPlantilla}" class=" btn btn-primary">Nueva plantilla</a>
+		<a class="btn btn-primary" th:href="@{/logout}">Salir</a>
+
+	</div>
+
+</body>
+</html>

@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+<meta charset="utf-8">
+<!-- Bootstrap CSS -->
+<link th:href="@{/css/bootstrap/bootstrap.min.css}" rel="stylesheet"
+	type="text/css" href="../static/css/bootstrap.min.css">
+<title>Registro</title>
+</head>
+<body>
+ 
+
+  <header th:insert="fragments/cabecera.html :: cabecera"></header>
+ <div class="container"> 
+  <form th:action="@{/guardarUsuario}" method="post" th:object="${usuario}" enctype="multipart/form-data">
+  <div th:if="${#fields.hasErrors('*')}" class='alert alert-danger' role='alert'>
+			Por favor corrija los siguientes errores:
+			<ul>
+			<li th:each="err : ${#fields.errors('*')}" th:text="${err}" />
+			</ul>
+	   </div>
+
+    <div class="form-group"> <!-- Full Name -->
+        <label for="nombre_id" class="control-label">Nombre</label>
+        <input type="text" class="form-control" th:field="*{nombre}" id="nombre_id" name="full_name" placeholder="Escriba el nombre">
+    </div>    
+
+    <div class="form-group">  
+        <label for="apellidos_id" class="control-label">Apellidos</label>
+        <input type="text" class="form-control" th:field="*{apellidos}" id="apellidos_id" name="apellidos" placeholder="Escriba los apellidos">
+    </div>                    
+                            
+    <div class="form-group"> <!-- Street 2 -->
+        <label for="email_id" class="control-label">Email</label>
+        <input type="email" class="form-control" th:field="*{email}" id="email_id" name="email" placeholder="Escriba el email">
+    </div>    
+
+    <div class="form-group"> <!-- City-->
+        <label for="pass_id" class="control-label">Contraseña</label>
+        <input type="password" class="form-control" id="pass_id" th:field="*{password}" name="pass" placeholder="Escriba la contraseña">
+    </div>  
+    
+     <div class="form-group"> <!-- City-->
+        <label for="passR_id" class="control-label">Escriba otra vez la Contraseña</label>
+        <input type="text" class="form-control" id="passR_id" name="pass" placeholder="Escriba otra vez la contraseña">
+    </div>                                    
+                            
+   
+    <div class="form-group"> <!-- Submit Button -->
+        <button type="submit" class="btn btn-primary">Registrarse</button>
+    </div>     
+</div>    
+</form>
+</body>
+</html>
