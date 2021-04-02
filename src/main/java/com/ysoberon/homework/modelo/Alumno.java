@@ -35,7 +35,10 @@ public class Alumno {
 	public Alumno() {
 		super();
 	}
-
+   /**
+    * 
+    * @param plantilla
+    */
 	public void agregarPlantilla(Plantilla plantilla) {
 		if (plantillas == null) {
 			plantillas = new ArrayList<Plantilla>();
