@@ -143,6 +143,13 @@ public class Controlador {
 
 	}
 	
+	@GetMapping("/ventanaAlumno")
+	public String mostrarVentanaAlumno() {
+
+		return "ventanaAlumno";
+
+	}
+	
 	@PostMapping("/guardarPlantilla")
 	public String guardarPlantilla(@ModelAttribute Plantilla plantilla, BindingResult result, Model model) {
 	 return "";

@@ -29,7 +29,11 @@
 				<th>Operaciones</th>
 			</tr>
 			<tr th:each="alumno:${alumnos}">
-				<td th:text="${alumno.nombre}"></td>
+			 
+			 
+		 
+			<td	><a th:href="@{/ventanaAlumno}"><span th:text="${alumno.nombre}"></span></a></td> 
+					 
 				<td th:text="${alumno.edad}"></td>
 				<td><img class="rounded mx-auto d-block"
 					th:src="@{/logos/{img}   (img=${alumno.imagen})}"
@@ -47,7 +51,7 @@
 		<br>
 		<br>
 		<a th:href="@{/nuevoAlumno}" class=" btn btn-primary">Nuevo alumno</a>
-		<a th:href="@{/nuevaPlantilla}" class=" btn btn-primary">Nueva plantilla</a>
+ 
 		<a class="btn btn-primary" th:href="@{/logout}">Salir</a>
 
 	</div>
