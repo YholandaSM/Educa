@@ -32,7 +32,7 @@
 			 
 			 
 		 
-			<td	><a th:href="@{/ventanaAlumno}"><span th:text="${alumno.nombre}"></span></a></td> 
+			<td	><a th:href="@{/ventanaAlumno/{id} (id=${alumno.id_alumno})}"><span th:text="${alumno.nombre}"></span></a></td> 
 					 
 				<td th:text="${alumno.edad}"></td>
 				<td><img class="rounded mx-auto d-block"

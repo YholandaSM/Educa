@@ -143,16 +143,18 @@ public class Controlador {
 
 	}
 	
-	@GetMapping("/ventanaAlumno")
-	public String mostrarVentanaAlumno() {
 
-		return "ventanaAlumno";
-
-	}
-	
 	@PostMapping("/guardarPlantilla")
-	public String guardarPlantilla(@ModelAttribute Plantilla plantilla, BindingResult result, Model model) {
-	 return "";
+	public String guardarPlantilla(Alumno alumno, BindingResult result, Model model) {
+		
+		Alumno alumno1 = alumnoServicio.findById(alumno.getId_alumno());
+		Plantilla plantilla=  new Plantilla();
+		
+		plantilla.setId_plantilla(7);
+		alumno1.agregarPlantilla(plantilla);
+		alumnoServicio.guardarAlumno(alumno1);
+	 
+	    return "redirect:/home";
 	}
 	
 	@GetMapping("/registro")
@@ -219,6 +221,15 @@ public class Controlador {
 		model.addAttribute("alumno", alumno);
 		return "formNuevoAlumno";
 	}
+	
+	@GetMapping("/ventanaAlumno/{id}")
+	public String mostrarVentanaAlumno(@PathVariable("id") int id_alumno, Model model) {
+		Alumno alumno = alumnoServicio.findById(id_alumno);
+		model.addAttribute("alumno", alumno);
+		return "ventanaAlumno";
+
+	}
+	
 	
 	
 	

@@ -14,6 +14,8 @@ import javax.persistence.ManyToMany;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 
+import org.springframework.web.bind.annotation.PostMapping;
+
 @Entity
 @Table(name = "alumno")
 public class Alumno {
@@ -39,6 +41,7 @@ public class Alumno {
     * 
     * @param plantilla
     */
+ 
 	public void agregarPlantilla(Plantilla plantilla) {
 		if (plantillas == null) {
 			plantillas = new ArrayList<Plantilla>();
