@@ -98,6 +98,8 @@ public class Alumno {
 	public void setPlantillas(List<Plantilla> plantillas) {
 		this.plantillas = plantillas;
 	}
+	
+	
 
 	@Override
 	public String toString() {

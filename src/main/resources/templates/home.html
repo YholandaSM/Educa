@@ -46,11 +46,42 @@
 			</tr>
 			<tr>
 		</table>
+		
+		 <!--Tabla para las plantillas -->
+		
+		<table style="width: 100%" border="2">
+			<tr>
+			 
+				<th>Nombre</th>
+				<th>Categoria</th>
+				<th>Detalles</th>
+				<th>Operaciones</th>
+				 
+			</tr>
+			<tr th:each="plantilla:${plantillas}">
+			 
+			 
+		 
+		         <td th:text="${plantilla.nombre}"></td>
+					 
+				<td th:text="${plantilla.categoria.nombre}"></td>
+				<td th:text="${plantilla.detalles}"></td>
+					<td>
+				<a th:href="@{/eliminarPlantilla/{id} (id=${plantilla.id_plantilla})}" onclick="return confirm('¿Estás seguro?')"    class="btn btn-success btn-sm" role="button" title="Eliminar"><i class="fas fa-trash" aria-hidden="true"></i></a>
+				 </td>
+				 
+				
+				 
+			</tr>
+			 
+		</table>
+		
 
 
 		<br>
 		<br>
 		<a th:href="@{/nuevoAlumno}" class=" btn btn-primary">Nuevo alumno</a>
+		<a th:href="@{/nuevaPlantilla}" class=" btn btn-primary">Nueva plantilla</a>
  
 		<a class="btn btn-primary" th:href="@{/logout}">Salir</a>
 

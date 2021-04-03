@@ -32,6 +32,7 @@ import com.ysoberon.homework.modelo.Usuario;
 import com.ysoberon.homework.servicios.IAlumnoServicio;
 import com.ysoberon.homework.servicios.ICategoriaServicio;
 import com.ysoberon.homework.servicios.ICursoServicio;
+import com.ysoberon.homework.servicios.IPlantillaServicio;
 import com.ysoberon.homework.servicios.IUsuarioServicio;
 import com.ysoberon.homework.util.Utils;
 
@@ -58,6 +59,9 @@ public class Controlador {
 	
 	@Autowired
 	private ICursoServicio cursoServicio;
+	
+	@Autowired
+	private IPlantillaServicio plantillaServicio;
 	
  	@Autowired
  	private PasswordEncoder passwordEncoder;
@@ -123,6 +127,11 @@ public class Controlador {
 		  usuario = usuarioServicio.buscarPorEmail(email);
 		List<Alumno> lista = alumnoServicio.findAlumnosByUsuario(usuario);
 		model.addAttribute("alumnos", lista);
+		
+		//Plantillas
+		List<Plantilla> listaPlantillas=plantillaServicio.findPlantillasByUsuario(usuario);
+		model.addAttribute("plantillas", listaPlantillas);
+		
 		return "home";
 
 	}
@@ -137,25 +146,12 @@ public class Controlador {
 	
 	
 	@GetMapping("/nuevaPlantilla")
-	public String crearNuevaPlantilla(@ModelAttribute Plantilla Plantilla) {
+	public String crearNuevaPlantilla(Plantilla Plantilla) {
 
 		return "formNuevaPlantilla";
 
 	}
-	
-
-	@PostMapping("/guardarPlantilla")
-	public String guardarPlantilla(Alumno alumno, BindingResult result, Model model) {
-		
-		Alumno alumno1 = alumnoServicio.findById(alumno.getId_alumno());
-		Plantilla plantilla=  new Plantilla();
-		
-		plantilla.setId_plantilla(7);
-		alumno1.agregarPlantilla(plantilla);
-		alumnoServicio.guardarAlumno(alumno1);
-	 
-	    return "redirect:/home";
-	}
+ 
 	
 	@GetMapping("/registro")
 	public String mostrarformRegistro(Usuario usuario) {
@@ -164,7 +160,7 @@ public class Controlador {
 		
 	}
 	@PostMapping("/guardarAlumno")
-	public String insertarAlumno(Alumno alumno, BindingResult result, RedirectAttributes attributes,
+	public String insertarAlumno(Alumno alumno, BindingResult result, RedirectAttributes attributes, Model modelo,
 			@RequestParam("archivoImagen") MultipartFile multiPart) {
 
 		if (result.hasErrors()) {
@@ -179,6 +175,8 @@ public class Controlador {
 				alumno.setImagen(nombreImagen);
 			}
 		}
+		Usuario usuario=(Usuario) modelo.getAttribute("usuario");
+		alumno.setUsuario(usuario);
 		alumnoServicio.guardarAlumno(alumno);
 		attributes.addFlashAttribute("msg", "Alumno guardado");
 
@@ -186,6 +184,42 @@ public class Controlador {
 
 	}
 	
+	@PostMapping("/guardarAlumnoPlantilla")
+	public String insertarAlumnoPlantilla(Alumno alumno, BindingResult result, RedirectAttributes attributes, Model modelo)
+			  {
+
+		if (result.hasErrors()) {
+			return "formNuevoAlumno";
+		}
+
+		 
+		alumno.agregarPlantilla(null); 
+		Alumno alumno1=alumnoServicio.findById(alumno.getId_alumno());
+		alumnoServicio.guardarAlumno(alumno1);
+		attributes.addFlashAttribute("msg", "Alumno guardado");
+
+		return "redirect:/home";
+
+	}
+	
+	
+	
+	@PostMapping("/guardarPlantilla")
+	public String insertarPlantilla(Plantilla plantilla, BindingResult result, Model modelo, RedirectAttributes attributes)
+			
+			 {
+
+		if (result.hasErrors()) {
+			return "formNuevaPlantilla";
+		} 
+		
+		Usuario usuario=(Usuario) modelo.getAttribute("usuario");
+	 
+		plantilla.setUsuario(usuario);
+        plantillaServicio.guardar(plantilla);
+		return "redirect:/home";
+
+	}
 	@PostMapping("/guardarUsuario")
 	public String insertarUsuario(Usuario usuario, BindingResult result, RedirectAttributes attributes )
 			 {
@@ -212,6 +246,13 @@ public class Controlador {
 	public String eliminar(@PathVariable("id") int id_alumno, RedirectAttributes attributes) {
 		alumnoServicio.eliminarAlumno(id_alumno);
 		attributes.addFlashAttribute("msg", "Alumno eliminado");
+		return "redirect:/home";
+	}
+	
+	@GetMapping("/eliminarPlantilla/{id}")
+	public String eliminarPlantilla(@PathVariable("id") int id_plantilla, RedirectAttributes attributes) {
+		plantillaServicio.eliminarPlantilla(id_plantilla);
+		attributes.addFlashAttribute("msg", "Plantilla eliminada");
 		return "redirect:/home";
 	}
 
@@ -244,9 +285,10 @@ public class Controlador {
 		model.addAttribute("cursos", cursoServicio.buscarTodos());	
 		if(auth!=null) {
 		Usuario usuario = usuarioServicio.buscarPorEmail(auth.getName());
+		model.addAttribute("usuario",usuario);
 		
-		
-		model.addAttribute("alumnos", alumnoServicio.findAlumnosByUsuario(usuario));	
+		model.addAttribute("alumnos", alumnoServicio.findAlumnosByUsuario(usuario));
+		model.addAttribute("plantillas", plantillaServicio.findPlantillasByUsuario(usuario));
 		}
 	}
 

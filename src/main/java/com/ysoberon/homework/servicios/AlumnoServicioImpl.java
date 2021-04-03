@@ -11,21 +11,15 @@ import com.ysoberon.homework.modelo.Alumno;
 import com.ysoberon.homework.modelo.Usuario;
 import com.ysoberon.homework.repositorios.AlumnoRepositorio;
 
- 
-
-
 @Service
 public class AlumnoServicioImpl implements IAlumnoServicio {
-	
+
 	@Autowired
-	 private AlumnoRepositorio repoAlumno;
+	private AlumnoRepositorio repoAlumno;
 
 	@Override
 	public void guardarAlumno(Alumno alumno) {
-		 Usuario usuario= new Usuario();
-		 usuario.setId_usuario(1);
-		 alumno.setUsuario(usuario);
-		 repoAlumno.save(alumno);
+		repoAlumno.save(alumno);
 
 	}
 
@@ -37,18 +31,18 @@ public class AlumnoServicioImpl implements IAlumnoServicio {
 	@Override
 	public void eliminarAlumno(Integer idAlumno) {
 		repoAlumno.deleteById(idAlumno);
-		
+
 	}
 
 	@Override
 	public Alumno findById(Integer idAlumno) {
-		Optional<Alumno> optional=repoAlumno.findById(idAlumno);
-		
-		if(optional!=null) {
-			
+		Optional<Alumno> optional = repoAlumno.findById(idAlumno);
+
+		if (optional != null) {
+
 			return optional.get();
 		}
-		
+
 		return null;
 	}
 
