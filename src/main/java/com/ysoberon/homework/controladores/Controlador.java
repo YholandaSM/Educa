@@ -36,129 +36,115 @@ import com.ysoberon.homework.servicios.IPlantillaServicio;
 import com.ysoberon.homework.servicios.IUsuarioServicio;
 import com.ysoberon.homework.util.Utils;
 
- 
-
- 
-
 @Controller
 public class Controlador {
 
 	/*
 	 * @Value("${educaapp.ruta.imagenes}") private String ruta;
 	 */
- 
 
 	@Autowired
 	private IAlumnoServicio alumnoServicio;
 
 	@Autowired
 	private IUsuarioServicio usuarioServicio;
-	
+
 	@Autowired
 	private ICategoriaServicio categoriaServicio;
-	
+
 	@Autowired
 	private ICursoServicio cursoServicio;
-	
+
 	@Autowired
 	private IPlantillaServicio plantillaServicio;
-	
- 	@Autowired
- 	private PasswordEncoder passwordEncoder;
-	
-	 
+
+	@Autowired
+	private PasswordEncoder passwordEncoder;
 
 	// Ruta donde se guardarán las imágenes
 	// @Value("${educapadres.ruta.imagenes}")
 	// private String ruta;
 
 	// La página de login es la página de inicio
-	 
-	
+
 	@GetMapping("/login")
 	public String mostrarLogin() {
 		return "formLogin";
 	}
-	
+
 	@GetMapping("/logout")
 	public String mostrarLogin(HttpServletRequest request) {
-		SecurityContextLogoutHandler logoutHandler=
-				new SecurityContextLogoutHandler();
-		logoutHandler.logout(request, null, null); 
-		
+		SecurityContextLogoutHandler logoutHandler = new SecurityContextLogoutHandler();
+		logoutHandler.logout(request, null, null);
+
 		return "redirect:/login";
 	}
-	
-	
-	
 
 	/**
 	 * Método que esta mapeado al botón Ingresar en el menú
+	 * 
 	 * @param authentication
 	 * @param session
 	 * @return
 	 */
 	@GetMapping("/index")
-	public String mostrarIndex(Authentication authentication, HttpSession session) {		
-		
-		// Como el usuario ya ingreso, ya podemos agregar a la session el objeto usuario.
-		String username = authentication.getName();		
-		
-		for(GrantedAuthority rol: authentication.getAuthorities()) {
+	public String mostrarIndex(Authentication authentication, HttpSession session) {
+
+		// Como el usuario ya ingreso, ya podemos agregar a la session el objeto
+		// usuario.
+		String username = authentication.getName();
+
+		for (GrantedAuthority rol : authentication.getAuthorities()) {
 			System.out.println("ROL: " + rol.getAuthority());
 		}
-		
-		if (session.getAttribute("usuario") == null){
-			Usuario usuario = usuarioServicio.buscarPorEmail(username);	
-			//System.out.println("Usuario: " + usuario);
+
+		if (session.getAttribute("usuario") == null) {
+			Usuario usuario = usuarioServicio.buscarPorEmail(username);
+			// System.out.println("Usuario: " + usuario);
 			session.setAttribute("usuario", usuario);
 		}
-		
+
 		return "redirect:/home";
 	}
-	
- 
 
 	@GetMapping("/home")
 	public String mostrarPagPrincipal(Model model, Authentication auth) {
 		Usuario usuario = new Usuario();
-	//	usuario.setId_usuario(1);
-		String email=auth.getName();
-		  usuario = usuarioServicio.buscarPorEmail(email);
+		// usuario.setId_usuario(1);
+		String email = auth.getName();
+		usuario = usuarioServicio.buscarPorEmail(email);
 		List<Alumno> lista = alumnoServicio.findAlumnosByUsuario(usuario);
 		model.addAttribute("alumnos", lista);
-		
-		//Plantillas
-		List<Plantilla> listaPlantillas=plantillaServicio.findPlantillasByUsuario(usuario);
+
+		// Plantillas
+		List<Plantilla> listaPlantillas = plantillaServicio.findPlantillasByUsuario(usuario);
 		model.addAttribute("plantillas", listaPlantillas);
-		
+
 		return "home";
 
 	}
 
-	 
 	@GetMapping("/nuevoAlumno")
 	public String crearNuevoAlumno(Alumno alumno) {
 
 		return "formNuevoAlumno";
 
 	}
-	
-	
+
 	@GetMapping("/nuevaPlantilla")
 	public String crearNuevaPlantilla(Plantilla Plantilla) {
 
 		return "formNuevaPlantilla";
 
 	}
- 
-	
+
 	@GetMapping("/registro")
 	public String mostrarformRegistro(Usuario usuario) {
 
 		return "formRegistro";
-		
+
 	}
+
 	@PostMapping("/guardarAlumno")
 	public String insertarAlumno(Alumno alumno, BindingResult result, RedirectAttributes attributes, Model modelo,
 			@RequestParam("archivoImagen") MultipartFile multiPart) {
@@ -175,7 +161,7 @@ public class Controlador {
 				alumno.setImagen(nombreImagen);
 			}
 		}
-		Usuario usuario=(Usuario) modelo.getAttribute("usuario");
+		Usuario usuario = (Usuario) modelo.getAttribute("usuario");
 		alumno.setUsuario(usuario);
 		alumnoServicio.guardarAlumno(alumno);
 		attributes.addFlashAttribute("msg", "Alumno guardado");
@@ -183,51 +169,51 @@ public class Controlador {
 		return "redirect:/home";
 
 	}
-	
+
 	@PostMapping("/guardarAlumnoPlantilla")
-	public String insertarAlumnoPlantilla(Alumno alumno, BindingResult result, RedirectAttributes attributes, Model modelo)
-			  {
+	public String insertarAlumnoPlantilla(Alumno alumno, BindingResult result, RedirectAttributes attributes,
+			Model modelo) {
 
 		if (result.hasErrors()) {
 			return "formNuevoAlumno";
 		}
 
 		 
-		alumno.agregarPlantilla(null); 
-		Alumno alumno1=alumnoServicio.findById(alumno.getId_alumno());
+	
+		Alumno alumno1 = alumnoServicio.findById(alumno.getId_alumno());
+		alumno1.agregarPlantilla(alumno.getPlantilla());
 		alumnoServicio.guardarAlumno(alumno1);
 		attributes.addFlashAttribute("msg", "Alumno guardado");
 
 		return "redirect:/home";
 
 	}
-	
-	
-	
+
 	@PostMapping("/guardarPlantilla")
-	public String insertarPlantilla(Plantilla plantilla, BindingResult result, Model modelo, RedirectAttributes attributes)
-			
-			 {
+	public String insertarPlantilla(Plantilla plantilla, BindingResult result, Model modelo,
+			RedirectAttributes attributes)
+
+	{
 
 		if (result.hasErrors()) {
 			return "formNuevaPlantilla";
-		} 
-		
-		Usuario usuario=(Usuario) modelo.getAttribute("usuario");
-	 
+		}
+
+		Usuario usuario = (Usuario) modelo.getAttribute("usuario");
+
 		plantilla.setUsuario(usuario);
-        plantillaServicio.guardar(plantilla);
+		plantillaServicio.guardar(plantilla);
 		return "redirect:/home";
 
 	}
+
 	@PostMapping("/guardarUsuario")
-	public String insertarUsuario(Usuario usuario, BindingResult result, RedirectAttributes attributes )
-			 {
-		
-		String pwdPlano=usuario.getPassword();
-		String pwdEncriptado=passwordEncoder.encode(pwdPlano);
+	public String insertarUsuario(Usuario usuario, BindingResult result, RedirectAttributes attributes) {
+
+		String pwdPlano = usuario.getPassword();
+		String pwdEncriptado = passwordEncoder.encode(pwdPlano);
 		usuario.setPassword(pwdEncriptado);
-	 
+
 		if (result.hasErrors()) {
 			return "formRegistro";
 		}
@@ -240,15 +226,13 @@ public class Controlador {
 
 	}
 
-	
-
 	@GetMapping("/eliminarAlumno/{id}")
 	public String eliminar(@PathVariable("id") int id_alumno, RedirectAttributes attributes) {
 		alumnoServicio.eliminarAlumno(id_alumno);
 		attributes.addFlashAttribute("msg", "Alumno eliminado");
 		return "redirect:/home";
 	}
-	
+
 	@GetMapping("/eliminarPlantilla/{id}")
 	public String eliminarPlantilla(@PathVariable("id") int id_plantilla, RedirectAttributes attributes) {
 		plantillaServicio.eliminarPlantilla(id_plantilla);
@@ -262,7 +246,7 @@ public class Controlador {
 		model.addAttribute("alumno", alumno);
 		return "formNuevoAlumno";
 	}
-	
+
 	@GetMapping("/ventanaAlumno/{id}")
 	public String mostrarVentanaAlumno(@PathVariable("id") int id_alumno, Model model) {
 		Alumno alumno = alumnoServicio.findById(id_alumno);
@@ -270,25 +254,23 @@ public class Controlador {
 		return "ventanaAlumno";
 
 	}
-	
-	
-	
-	
+
 	/**
-	 * Agregamos al Model la lista de Categorias: De esta forma nos evitamos agregarlos en los metodos
-	 * crear y editar. 
+	 * Agregamos al Model la lista de Categorias: De esta forma nos evitamos
+	 * agregarlos en los metodos crear y editar.
+	 * 
 	 * @return
-	 */	
+	 */
 	@ModelAttribute
-	public void setGenericos(Model model, Authentication auth){
-		model.addAttribute("categorias", categoriaServicio.buscarTodas());	
-		model.addAttribute("cursos", cursoServicio.buscarTodos());	
-		if(auth!=null) {
-		Usuario usuario = usuarioServicio.buscarPorEmail(auth.getName());
-		model.addAttribute("usuario",usuario);
-		
-		model.addAttribute("alumnos", alumnoServicio.findAlumnosByUsuario(usuario));
-		model.addAttribute("plantillas", plantillaServicio.findPlantillasByUsuario(usuario));
+	public void setGenericos(Model model, Authentication auth) {
+		model.addAttribute("categorias", categoriaServicio.buscarTodas());
+		model.addAttribute("cursos", cursoServicio.buscarTodos());
+		if (auth != null) {
+			Usuario usuario = usuarioServicio.buscarPorEmail(auth.getName());
+			model.addAttribute("usuario", usuario);
+
+			model.addAttribute("alumnos", alumnoServicio.findAlumnosByUsuario(usuario));
+			model.addAttribute("plantillas", plantillaServicio.findPlantillasByUsuario(usuario));
 		}
 	}
 
@@ -299,15 +281,13 @@ public class Controlador {
 		SimpleDateFormat dateFormat = new SimpleDateFormat("dd-mm-yyyy");
 		webDataBinder.registerCustomEditor(Date.class, new CustomDateEditor(dateFormat, false));
 	}
-	
-	
-	
+
 	@GetMapping("/bcrypt/{texto}")
 	@ResponseBody
-	public String encriptar(@PathVariable("texto") String texto ) {
-		
-		return texto +" : " + passwordEncoder.encode(texto);
-		
+	public String encriptar(@PathVariable("texto") String texto) {
+
+		return texto + " : " + passwordEncoder.encode(texto);
+
 	}
 
 }

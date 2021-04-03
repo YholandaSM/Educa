@@ -13,8 +13,9 @@ import javax.persistence.JoinTable;
 import javax.persistence.ManyToMany;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
+import javax.persistence.Transient;
 
-import org.springframework.web.bind.annotation.PostMapping;
+ 
 
 @Entity
 @Table(name = "alumno")
@@ -33,7 +34,17 @@ public class Alumno {
 	@ManyToMany(fetch = FetchType.EAGER)
 	@JoinTable(name = "alumno_plantilla", joinColumns = @JoinColumn(name = "id_alumno"), inverseJoinColumns = @JoinColumn(name = "id_plantilla"))	 
 	private List<Plantilla> plantillas;
-
+    
+    @Transient
+	private Plantilla plantilla;
+	
+	 
+	public Plantilla getPlantilla() {
+		return plantilla;
+	}
+	public void setPlantilla(Plantilla plantilla) {
+		this.plantilla = plantilla;
+	}
 	public Alumno() {
 		super();
 	}
