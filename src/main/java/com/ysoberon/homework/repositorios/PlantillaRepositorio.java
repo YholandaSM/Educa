@@ -14,6 +14,6 @@ import com.ysoberon.homework.modelo.Usuario;
 public interface PlantillaRepositorio extends JpaRepository<Plantilla, Integer> {
 	
 	  List<Plantilla> findByUsuario(Usuario usuario);
-
+	  List<Plantilla> findByNombre(String nombre);
 	  Optional<Plantilla> findById(Integer id);
 }

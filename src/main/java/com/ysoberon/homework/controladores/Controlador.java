@@ -27,12 +27,15 @@ import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import com.ysoberon.homework.modelo.Alumno;
+import com.ysoberon.homework.modelo.Ejercicio;
 import com.ysoberon.homework.modelo.Plantilla;
 import com.ysoberon.homework.modelo.Usuario;
 import com.ysoberon.homework.servicios.IAlumnoServicio;
 import com.ysoberon.homework.servicios.ICategoriaServicio;
 import com.ysoberon.homework.servicios.ICursoServicio;
+import com.ysoberon.homework.servicios.IEjercicioServicio;
 import com.ysoberon.homework.servicios.IPlantillaServicio;
+import com.ysoberon.homework.servicios.ITipoServicio;
 import com.ysoberon.homework.servicios.IUsuarioServicio;
 import com.ysoberon.homework.util.Utils;
 
@@ -51,12 +54,18 @@ public class Controlador {
 
 	@Autowired
 	private ICategoriaServicio categoriaServicio;
+	
+	@Autowired
+	private ITipoServicio tipoServicio;
 
 	@Autowired
 	private ICursoServicio cursoServicio;
 
 	@Autowired
 	private IPlantillaServicio plantillaServicio;
+	
+	@Autowired
+	private IEjercicioServicio ejercicioServicio;
 
 	@Autowired
 	private PasswordEncoder passwordEncoder;
@@ -186,6 +195,30 @@ public class Controlador {
 		attributes.addFlashAttribute("msg", "Alumno guardado");
 
 		return "redirect:/home";
+		//return "formAgregarEjercicios";
+
+	}
+	
+	@PostMapping("/guardarEjercicio")
+	public String insertarEjercicio( Ejercicio ejercicio, BindingResult result, RedirectAttributes attributes,
+			Model modelo) {
+
+		if (result.hasErrors()) {
+			return "formNuevoAlumno";
+		}
+ 
+		// Integer id=Integer.parseInt(id_plantilla);
+		
+	   // Plantilla plantilla=plantillaServicio.findById(id);
+	   
+		//ejercicio.setPlantilla(plantilla);
+	
+		List<Plantilla> plantillas =   (List<Plantilla>) modelo.getAttribute("plantillas");
+		Plantilla plantilla=plantillas.get(0);
+		ejercicioServicio.guardarEjercicio(ejercicio);
+		attributes.addFlashAttribute("msg", "Ejercicio guardado");
+
+		return "redirect:/home";
 
 	}
 
@@ -203,7 +236,11 @@ public class Controlador {
 
 		plantilla.setUsuario(usuario);
 		plantillaServicio.guardar(plantilla);
-		return "redirect:/home";
+		List<Plantilla> lista=plantillaServicio.findPlantillasByNombre(plantilla.getNombre());
+		Integer plantillaCreada=lista.get(0).getId_plantilla();
+		System.out.println(plantillaCreada+"plantillaCreada");
+		//return "redirect:/home";
+		return "formAgregarEjercicios";
 
 	}
 
@@ -254,6 +291,15 @@ public class Controlador {
 		return "ventanaAlumno";
 
 	}
+	
+	@GetMapping("/editarPlantilla/{id}")
+	public String editarPlantilla(@PathVariable("id") int id_plantilla, Model model) {
+		Plantilla plantilla =plantillaServicio.findById(id_plantilla);
+		model.addAttribute("plantilla", plantilla);
+		return "formAgregarEjercicios";
+	}
+	
+	
 
 	/**
 	 * Agregamos al Model la lista de Categorias: De esta forma nos evitamos
@@ -264,6 +310,7 @@ public class Controlador {
 	@ModelAttribute
 	public void setGenericos(Model model, Authentication auth) {
 		model.addAttribute("categorias", categoriaServicio.buscarTodas());
+		model.addAttribute("tipos", tipoServicio.buscarTodos());
 		model.addAttribute("cursos", cursoServicio.buscarTodos());
 		if (auth != null) {
 			Usuario usuario = usuarioServicio.buscarPorEmail(auth.getName());
@@ -271,6 +318,7 @@ public class Controlador {
 
 			model.addAttribute("alumnos", alumnoServicio.findAlumnosByUsuario(usuario));
 			model.addAttribute("plantillas", plantillaServicio.findPlantillasByUsuario(usuario));
+			model.addAttribute("ejercicio", new Ejercicio());
 		}
 	}
 

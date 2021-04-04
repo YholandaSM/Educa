@@ -67,6 +67,7 @@
 				<td th:text="${plantilla.categoria.nombre}"></td>
 				<td th:text="${plantilla.detalles}"></td>
 					<td>
+				<a th:href="@{/editarPlantilla/{id} (id=${plantilla.id_plantilla})}" class="btn btn-success btn-sm" role="button" title="Editar"><i class="fas fa-pencil-alt" aria-hidden="true"></i></a>
 				<a th:href="@{/eliminarPlantilla/{id} (id=${plantilla.id_plantilla})}" onclick="return confirm('¿Estás seguro?')"    class="btn btn-success btn-sm" role="button" title="Eliminar"><i class="fas fa-trash" aria-hidden="true"></i></a>
 				 </td>
 				 
