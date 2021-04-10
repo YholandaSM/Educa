@@ -2,6 +2,7 @@ package com.ysoberon.homework.controladores;
 
 import java.sql.Date;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.List;
 
 import javax.servlet.http.HttpServletRequest;
@@ -29,14 +30,18 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import com.ysoberon.homework.modelo.Alumno;
 import com.ysoberon.homework.modelo.Ejercicio;
 import com.ysoberon.homework.modelo.Plantilla;
+import com.ysoberon.homework.modelo.Respuesta;
+import com.ysoberon.homework.modelo.RespuestasForm;
 import com.ysoberon.homework.modelo.Usuario;
 import com.ysoberon.homework.servicios.IAlumnoServicio;
 import com.ysoberon.homework.servicios.ICategoriaServicio;
 import com.ysoberon.homework.servicios.ICursoServicio;
 import com.ysoberon.homework.servicios.IEjercicioServicio;
 import com.ysoberon.homework.servicios.IPlantillaServicio;
+import com.ysoberon.homework.servicios.IRespuestaServicio;
 import com.ysoberon.homework.servicios.ITipoServicio;
 import com.ysoberon.homework.servicios.IUsuarioServicio;
+import com.ysoberon.homework.servicios.RespuestaServicio;
 import com.ysoberon.homework.util.Utils;
 
 @Controller
@@ -54,7 +59,7 @@ public class Controlador {
 
 	@Autowired
 	private ICategoriaServicio categoriaServicio;
-	
+
 	@Autowired
 	private ITipoServicio tipoServicio;
 
@@ -63,9 +68,12 @@ public class Controlador {
 
 	@Autowired
 	private IPlantillaServicio plantillaServicio;
-	
+
 	@Autowired
 	private IEjercicioServicio ejercicioServicio;
+
+	@Autowired
+	private IRespuestaServicio respuestaServicio;
 
 	@Autowired
 	private PasswordEncoder passwordEncoder;
@@ -187,31 +195,45 @@ public class Controlador {
 			return "formNuevoAlumno";
 		}
 
-		 
-	
 		Alumno alumno1 = alumnoServicio.findById(alumno.getId_alumno());
 		alumno1.agregarPlantilla(alumno.getPlantilla());
 		alumnoServicio.guardarAlumno(alumno1);
 		attributes.addFlashAttribute("msg", "Alumno guardado");
 
 		return "redirect:/home";
-		//return "formAgregarEjercicios";
+		// return "formAgregarEjercicios";
 
 	}
-	
+
 	@PostMapping("/guardarEjercicio")
-	public String insertarEjercicio( Ejercicio ejercicio, BindingResult result, RedirectAttributes attributes,
+	public String insertarEjercicio(Ejercicio ejercicio, BindingResult result, RedirectAttributes attributes,
 			Model modelo, HttpSession session) {
 
 		if (result.hasErrors()) {
 			return "formNuevoAlumno";
 		}
- 
-		Plantilla plantilla=(Plantilla) session.getAttribute("plantilla");
+
+		Plantilla plantilla = (Plantilla) session.getAttribute("plantilla");
 		ejercicio.setPlantilla(plantilla);
 		ejercicioServicio.guardarEjercicio(ejercicio);
+		session.setAttribute("ejercicio", ejercicio);
+		 
 		attributes.addFlashAttribute("msg", "Ejercicio guardado");
 
+		return "redirect:/home";
+
+	}
+
+	@PostMapping("/guardarRespuestas")
+	public String insertarRespuestas(@ModelAttribute("respuestasForm") RespuestasForm respuestasForm,
+			BindingResult result, RedirectAttributes attributes, Model modelo, HttpSession session) {
+        Ejercicio ejercicio=(Ejercicio) session.getAttribute("ejercicio");
+		for (Respuesta respuesta : respuestasForm.getRespuestas()) {
+			respuesta.setEjercicio(ejercicio);
+			respuestaServicio.guardarRespuesta(respuesta);
+		}
+
+		System.out.println(modelo);
 		return "redirect:/home";
 
 	}
@@ -230,10 +252,10 @@ public class Controlador {
 
 		plantilla.setUsuario(usuario);
 		plantillaServicio.guardar(plantilla);
-		List<Plantilla> lista=plantillaServicio.findPlantillasByNombre(plantilla.getNombre());
-		Integer plantillaCreada=lista.get(0).getId_plantilla();
-		System.out.println(plantillaCreada+"plantillaCreada");
-		//return "redirect:/home";
+		List<Plantilla> lista = plantillaServicio.findPlantillasByNombre(plantilla.getNombre());
+		Integer plantillaCreada = lista.get(0).getId_plantilla();
+		System.out.println(plantillaCreada + "plantillaCreada");
+		// return "redirect:/home";
 		return "formAgregarEjercicios";
 
 	}
@@ -285,17 +307,31 @@ public class Controlador {
 		return "ventanaAlumno";
 
 	}
-	
+
 	@GetMapping("/editarPlantilla/{id}")
 	public String editarPlantilla(@PathVariable("id") int id_plantilla, Model model, HttpSession session) {
-		Plantilla plantilla =plantillaServicio.findById(id_plantilla);
-		
+		Plantilla plantilla = plantillaServicio.findById(id_plantilla);
+
 		session.setAttribute("plantilla", plantilla);
 		model.addAttribute("plantillaAEditar", plantilla);
 		return "formAgregarEjercicios";
 	}
-	
-	
+
+	@ModelAttribute("respuestasForm")
+	public RespuestasForm populatePojos(RespuestasForm respuestasParam) {
+		// Don"t forget to initialize the pojos list or else it won"t work
+		RespuestasForm respuestasForm = new RespuestasForm();
+		if (respuestasParam.getRespuestas()!=null) {
+
+			List<Respuesta> respuestas = new ArrayList<Respuesta>();
+			for (int i = 0; i < 3; i++) {
+				respuestas.add(respuestasParam.getRespuestas().get(i));
+			}
+			respuestasForm.setRespuestas(respuestas);
+
+		}
+		return respuestasForm;
+	}
 
 	/**
 	 * Agregamos al Model la lista de Categorias: De esta forma nos evitamos
@@ -304,7 +340,7 @@ public class Controlador {
 	 * @return
 	 */
 	@ModelAttribute
-	public void setGenericos(Model model, Authentication auth) {
+	public void setGenericos(Model model, Authentication auth, HttpSession session) {
 		model.addAttribute("categorias", categoriaServicio.buscarTodas());
 		model.addAttribute("tipos", tipoServicio.buscarTodos());
 		model.addAttribute("cursos", cursoServicio.buscarTodos());
@@ -312,10 +348,17 @@ public class Controlador {
 			Usuario usuario = usuarioServicio.buscarPorEmail(auth.getName());
 			model.addAttribute("usuario", usuario);
 
+			Plantilla plantilla = (Plantilla) session.getAttribute("plantilla");
+			if (plantilla != null) {
+				model.addAttribute("ejercicios", ejercicioServicio.findEjerciciosByPlantilla(plantilla));
+			}
 			model.addAttribute("alumnos", alumnoServicio.findAlumnosByUsuario(usuario));
+
 			model.addAttribute("plantillas", plantillaServicio.findPlantillasByUsuario(usuario));
 			model.addAttribute("ejercicio", new Ejercicio());
-			 
+			model.addAttribute("respuesta", new Respuesta());
+			model.addAttribute("respuestasForm", new RespuestasForm());
+
 		}
 	}
 

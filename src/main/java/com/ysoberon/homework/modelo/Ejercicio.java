@@ -20,8 +20,6 @@ public class Ejercicio {
 	@JoinColumn(name="id_tipo")
 	private Tipo tipo;
 	private String enunciado;
-	private String respuesta_ok;
-	private String respuestas_ko;
 	@ManyToOne
 	@JoinColumn(name="id_plantilla")
 	private Plantilla plantilla;
@@ -61,18 +59,7 @@ public class Ejercicio {
 	 
 	 
  
-	public String getRespuesta_ok() {
-		return respuesta_ok;
-	}
-	public void setRespuesta_ok(String respuesta_ok) {
-		this.respuesta_ok = respuesta_ok;
-	}
-	public String getRespuestas_ko() {
-		return respuestas_ko;
-	}
-	public void setRespuestas_ko(String respuestas_ko) {
-		this.respuestas_ko = respuestas_ko;
-	}
+	 
 	public Plantilla getPlantilla() {
 		return plantilla;
 	}
