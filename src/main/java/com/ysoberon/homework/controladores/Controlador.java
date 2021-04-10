@@ -201,20 +201,14 @@ public class Controlador {
 	
 	@PostMapping("/guardarEjercicio")
 	public String insertarEjercicio( Ejercicio ejercicio, BindingResult result, RedirectAttributes attributes,
-			Model modelo) {
+			Model modelo, HttpSession session) {
 
 		if (result.hasErrors()) {
 			return "formNuevoAlumno";
 		}
  
-		// Integer id=Integer.parseInt(id_plantilla);
-		
-	   // Plantilla plantilla=plantillaServicio.findById(id);
-	   
-		//ejercicio.setPlantilla(plantilla);
-	
-		List<Plantilla> plantillas =   (List<Plantilla>) modelo.getAttribute("plantillas");
-		Plantilla plantilla=plantillas.get(0);
+		Plantilla plantilla=(Plantilla) session.getAttribute("plantilla");
+		ejercicio.setPlantilla(plantilla);
 		ejercicioServicio.guardarEjercicio(ejercicio);
 		attributes.addFlashAttribute("msg", "Ejercicio guardado");
 
@@ -293,9 +287,11 @@ public class Controlador {
 	}
 	
 	@GetMapping("/editarPlantilla/{id}")
-	public String editarPlantilla(@PathVariable("id") int id_plantilla, Model model) {
+	public String editarPlantilla(@PathVariable("id") int id_plantilla, Model model, HttpSession session) {
 		Plantilla plantilla =plantillaServicio.findById(id_plantilla);
-		model.addAttribute("plantilla", plantilla);
+		
+		session.setAttribute("plantilla", plantilla);
+		model.addAttribute("plantillaAEditar", plantilla);
 		return "formAgregarEjercicios";
 	}
 	
@@ -319,6 +315,7 @@ public class Controlador {
 			model.addAttribute("alumnos", alumnoServicio.findAlumnosByUsuario(usuario));
 			model.addAttribute("plantillas", plantillaServicio.findPlantillasByUsuario(usuario));
 			model.addAttribute("ejercicio", new Ejercicio());
+			 
 		}
 	}
 
