@@ -314,6 +314,7 @@ public class Controlador {
 
 		session.setAttribute("plantilla", plantilla);
 		model.addAttribute("plantillaAEditar", plantilla);
+		model.addAttribute("ejercicios", ejercicioServicio.findEjerciciosByPlantilla(plantilla));
 		return "formAgregarEjercicios";
 	}
 
@@ -349,9 +350,9 @@ public class Controlador {
 			model.addAttribute("usuario", usuario);
 
 			Plantilla plantilla = (Plantilla) session.getAttribute("plantilla");
-			if (plantilla != null) {
-				model.addAttribute("ejercicios", ejercicioServicio.findEjerciciosByPlantilla(plantilla));
-			}
+			//if (plantilla != null) {
+				//model.addAttribute("ejercicios", ejercicioServicio.findEjerciciosByPlantilla(plantilla));
+			//}
 			model.addAttribute("alumnos", alumnoServicio.findAlumnosByUsuario(usuario));
 
 			model.addAttribute("plantillas", plantillaServicio.findPlantillasByUsuario(usuario));
