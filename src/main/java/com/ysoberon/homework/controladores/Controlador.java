@@ -292,6 +292,15 @@ public class Controlador {
 		attributes.addFlashAttribute("msg", "Plantilla eliminada");
 		return "redirect:/home";
 	}
+	
+	@GetMapping("/eliminarPlantillaAlumno/{id}")
+	public String eliminarPlantillaAlumno(@PathVariable("id") int id_plantilla, RedirectAttributes attributes,HttpSession session) {
+		Alumno alumno=(Alumno) session.getAttribute("alumno");
+		Plantilla plantilla=plantillaServicio.findById(id_plantilla);
+		alumno.eliminarPlantilla(plantilla);
+		attributes.addFlashAttribute("msg", "Plantilla eliminada");
+		return "redirect:/home";
+	}
 
 	@GetMapping("/editarAlumno/{id}")
 	public String editar(@PathVariable("id") int id_alumno, Model model) {
@@ -301,9 +310,13 @@ public class Controlador {
 	}
 
 	@GetMapping("/ventanaAlumno/{id}")
-	public String mostrarVentanaAlumno(@PathVariable("id") int id_alumno, Model model) {
+	public String mostrarVentanaAlumno(@PathVariable("id") int id_alumno, Model model,HttpSession session) {
 		Alumno alumno = alumnoServicio.findById(id_alumno);
+		List<Plantilla> plantillas=  alumno.getPlantillas();
 		model.addAttribute("alumno", alumno);
+		session.setAttribute("alumno", alumno);
+		model.addAttribute("plantillasAlumno", plantillas);
+		
 		return "ventanaAlumno";
 
 	}

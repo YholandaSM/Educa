@@ -61,6 +61,15 @@ public class Alumno {
 		plantillas.add(plantilla);
 
 	}
+	
+	public void eliminarPlantilla(Plantilla plantilla) {
+		if (plantillas == null) {
+			plantillas = new ArrayList<Plantilla>();
+		}
+
+		plantillas.remove(plantilla);
+
+	}
 
 	public Integer getId_alumno() {
 		return id_alumno;
