@@ -3,7 +3,13 @@ package com.ysoberon.homework.controladores;
 import java.sql.Date;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
+import java.util.Set;
+import java.util.TreeMap;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
@@ -16,12 +22,14 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.authentication.logout.SecurityContextLogoutHandler;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
+import org.springframework.util.MultiValueMap;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.WebDataBinder;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.multipart.MultipartFile;
@@ -382,6 +390,39 @@ public class Controlador {
 	public void initBinder(WebDataBinder webDataBinder) {
 		SimpleDateFormat dateFormat = new SimpleDateFormat("dd-mm-yyyy");
 		webDataBinder.registerCustomEditor(Date.class, new CustomDateEditor(dateFormat, false));
+	}
+	
+	@GetMapping("/hacerExamen/{id}")
+	public String hacerExamen(@PathVariable("id") int id_plantilla,Model modelo) {
+		Map<String,List<Respuesta>> ejercicios= new TreeMap<>();
+		Plantilla plantilla = plantillaServicio.findById(id_plantilla);
+		List<Ejercicio> listaEjercicios=ejercicioServicio.findEjerciciosByPlantilla(plantilla);	 
+		
+		for(Ejercicio ejercicio:listaEjercicios) {
+			ejercicios.put (ejercicio.getId_ejercicio().toString(),respuestaServicio.findRespuestasByEjercicio(ejercicio));
+			
+		}
+		modelo.addAttribute("ejercicios",ejercicios);
+		
+		return "hacerExamen";
+	}
+	
+	@PostMapping("/hacerExamen/validar")
+	public String hacerExamenValidacion(@RequestBody()  MultiValueMap<String, String> formData, Model modelo) {
+		
+		//TODO Map validados.
+		
+		Iterator it = formData.entrySet().iterator(); 
+		 while(it.hasNext()){
+			 Entry entry = (Entry)it.next();
+			 String key = (String) entry.getKey(); // respuesta_8_13
+			 String value = (String) entry.getValue(); // S
+	         Integer id_respuesta = Integer.parseInt(key.split("_")[2]);
+	         Respuesta respuesta = respuestaServicio.findRespuestasById(id_respuesta);
+	         respuesta.isCorrecta();
+	       }
+		
+		return "";
 	}
 
 	@GetMapping("/bcrypt/{texto}")
