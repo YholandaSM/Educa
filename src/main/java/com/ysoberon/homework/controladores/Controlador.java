@@ -37,8 +37,10 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import com.ysoberon.homework.modelo.Alumno;
 import com.ysoberon.homework.modelo.Ejercicio;
+import com.ysoberon.homework.modelo.EjercicioExamen;
 import com.ysoberon.homework.modelo.Plantilla;
 import com.ysoberon.homework.modelo.Respuesta;
+import com.ysoberon.homework.modelo.RespuestaExamen;
 import com.ysoberon.homework.modelo.RespuestasForm;
 import com.ysoberon.homework.modelo.Usuario;
 import com.ysoberon.homework.servicios.IAlumnoServicio;
@@ -411,16 +413,47 @@ public class Controlador {
 	public String hacerExamenValidacion(@RequestBody()  MultiValueMap<String, String> formData, Model modelo) {
 		
 		//TODO Map validados.
+		EjercicioExamen examen = new EjercicioExamen();
 		
-		Iterator it = formData.entrySet().iterator(); 
+		List<RespuestaExamen> respuestasExamen = new ArrayList<>();
+		RespuestaExamen respuestas = new RespuestaExamen();
+		
+		List<Respuesta> respuestasCorrectas = new ArrayList();
+		List<Respuesta> respuestasIncorrectas = new ArrayList();
+		
+		Integer lastIdEjercicio =-1;
+		
+		Iterator it = formData.entrySet().iterator();
+		//Skip csrf
+		it.next();
 		 while(it.hasNext()){
 			 Entry entry = (Entry)it.next();
 			 String key = (String) entry.getKey(); // respuesta_8_13
-			 String value = (String) entry.getValue(); // S
+			 //ArrayList value = (ArrayList) entry.getValue(); // S
+			 Integer id_ejercicio = Integer.parseInt(key.split("_")[1]);
+			 if ( lastIdEjercicio != id_ejercicio) {
+				 Ejercicio ejercicio = ejercicioServicio.findEjercicioById(id_ejercicio).get();
+				 respuestas.setEjercicio(ejercicio);				 
+				 respuestasCorrectas = new ArrayList<Respuesta>();
+				 respuestasIncorrectas = new ArrayList<Respuesta>();
+				 lastIdEjercicio = id_ejercicio;
+			 }					
 	         Integer id_respuesta = Integer.parseInt(key.split("_")[2]);
-	         Respuesta respuesta = respuestaServicio.findRespuestasById(id_respuesta);
-	         respuesta.isCorrecta();
+	         Respuesta respuesta = respuestaServicio.findRespuestaById(id_respuesta).get();
+	         if ( respuesta.isCorrecta() ) {
+	        	 respuestasCorrectas.add(respuesta);
+	         }	else {
+	        	 respuestasIncorrectas.add(respuesta);
+	         }    
+	          respuestas.setRespuestas(respuestasCorrectas);
+	          if ( lastIdEjercicio != id_ejercicio ) {
+	        	  respuestasExamen.add(respuestas);
+	          }
 	       }
+		 
+		 
+		 modelo.addAttribute("RespuestasExamenCorrectas",respuestas);
+		 modelo.addAttribute("RespuestasExamenCorrectas2",respuestasExamen);
 		
 		return "";
 	}
