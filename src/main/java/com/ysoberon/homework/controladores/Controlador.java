@@ -4,6 +4,7 @@ import java.sql.Date;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -38,6 +39,7 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import com.ysoberon.homework.modelo.Alumno;
 import com.ysoberon.homework.modelo.Ejercicio;
 import com.ysoberon.homework.modelo.EjercicioExamen;
+import com.ysoberon.homework.modelo.EntidadViewEjercicio;
 import com.ysoberon.homework.modelo.Plantilla;
 import com.ysoberon.homework.modelo.Respuesta;
 import com.ysoberon.homework.modelo.RespuestaExamen;
@@ -396,15 +398,22 @@ public class Controlador {
 	
 	@GetMapping("/hacerExamen/{id}")
 	public String hacerExamen(@PathVariable("id") int id_plantilla,Model modelo) {
-		Map<String,List<Respuesta>> ejercicios= new TreeMap<>();
+		Map<EntidadViewEjercicio,List<Respuesta>> ejercicios= new TreeMap<>(Collections.reverseOrder());
 		Plantilla plantilla = plantillaServicio.findById(id_plantilla);
+		modelo.addAttribute("plantilla", plantilla);
 		List<Ejercicio> listaEjercicios=ejercicioServicio.findEjerciciosByPlantilla(plantilla);	 
 		
-		for(Ejercicio ejercicio:listaEjercicios) {
-			ejercicios.put (ejercicio.getId_ejercicio().toString(),respuestaServicio.findRespuestasByEjercicio(ejercicio));
+		for(Ejercicio ejercicio : listaEjercicios) {
+			Integer id = ejercicio.getId_ejercicio();
+			String enunciado = ejercicio.getEnunciado();
+			EntidadViewEjercicio entidad = new EntidadViewEjercicio(id,enunciado,ejercicio.getNombre());
+			ejercicios.put (entidad,respuestaServicio.findRespuestasByEjercicio(ejercicio));
+			//ejercicios.put (ejercicio.getEnunciado(),respuestaServicio.findRespuestasByEjercicio(ejercicio));
 			
-		}
+		}		
+		
 		modelo.addAttribute("ejercicios",ejercicios);
+		 
 		
 		return "hacerExamen";
 	}
