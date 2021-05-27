@@ -434,7 +434,7 @@ public class Controlador {
 		List<RespuestaExamen> respuestasExamen = new ArrayList<>();
 		List<Ejercicio> ejercicios = new ArrayList<>();
 		Iterator it = formData.entrySet().iterator();
-		// Skip csrf
+		// Skip csrf 
 		it.next();
 		//IdPlantilla
 		Integer idPlantilla = Integer.parseInt((String) ((ArrayList) ((Entry)it.next()).getValue()).get(0));
@@ -449,6 +449,11 @@ public class Controlador {
 			Respuesta respuesta = respuestaServicio.findRespuestaById(idRespuesta).get();
 			respuestaExamen.setRespuesta(respuesta);
 			respuestaExamen.setCorrecta(respuesta.isCorrecta());
+			List<Respuesta> r = respuestaServicio.findByCorrectaAndEjercicio(true,ejercicio);
+			if ( !r.isEmpty() ) {
+				respuestaExamen.setRespuestaCorrecta(r.get(0));
+			}
+			//respuestaExamen.setRespuestaCorrecta(respuestaServicio.obtenerRespuestaCorrecta(true));
 			respuestasExamen.add(respuestaExamen);
 		}
 		getModelHacerExamen(modelo,idPlantilla);
