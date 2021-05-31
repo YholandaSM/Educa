@@ -94,6 +94,13 @@ public class Controlador {
 	// @Value("${educapadres.ruta.imagenes}")
 	// private String ruta;
 
+	
+	
+	@GetMapping("/")
+	public String redireccionarPantallaPrincipal() {
+		return "redirect:/home";
+	}
+	
 	// La página de login es la página de inicio
 
 	@GetMapping("/login")
@@ -408,24 +415,23 @@ public class Controlador {
 		modelo.addAttribute("plantilla", plantilla);
 	}
 	
-
-	@GetMapping("/hacerExamen/{id}")
-	public String hacerExamen(@PathVariable("id") int id_plantilla, Model modelo) {
-		
+	public Map<EntidadViewEjercicio,List<Respuesta>> getEjercicioRespuestas(List<Ejercicio> listaEjercicios) {
 		Map<EntidadViewEjercicio, List<Respuesta>> ejercicios = new TreeMap<>(Collections.reverseOrder());
-		
-		getModelHacerExamen(modelo,id_plantilla);
-		List<Ejercicio> listaEjercicios = ejercicioServicio.findEjerciciosByPlantilla((Plantilla) modelo.getAttribute("plantilla"));
-
 		for (Ejercicio ejercicio : listaEjercicios) {
 			Integer id = ejercicio.getId_ejercicio();
 			String enunciado = ejercicio.getEnunciado();
 			EntidadViewEjercicio entidad = new EntidadViewEjercicio(id, enunciado, ejercicio.getNombre());
 			ejercicios.put(entidad, respuestaServicio.findRespuestasByEjercicio(ejercicio));
 		}
+		return ejercicios;
+	}
+	
 
+	@GetMapping("/hacerExamen/{id}")
+	public String hacerExamen(@PathVariable("id") int id_plantilla, Model modelo) {
+		getModelHacerExamen(modelo,id_plantilla);
+		Map<EntidadViewEjercicio, List<Respuesta>> ejercicios = getEjercicioRespuestas(ejercicioServicio.findEjerciciosByPlantilla((Plantilla) modelo.getAttribute("plantilla")));
 		modelo.addAttribute("ejercicios", ejercicios);
-
 		return "hacerExamen";
 	}
 
@@ -457,7 +463,7 @@ public class Controlador {
 			respuestasExamen.add(respuestaExamen);
 		}
 		getModelHacerExamen(modelo,idPlantilla);
-		modelo.addAttribute("ejercicios", ejercicios);
+		modelo.addAttribute("ejercicios",getEjercicioRespuestas(ejercicios));
 		modelo.addAttribute("listValidacion", respuestasExamen);
 		return "hacerExamen";
 	}
