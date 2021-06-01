@@ -40,15 +40,18 @@ import com.ysoberon.homework.modelo.Alumno;
 import com.ysoberon.homework.modelo.Ejercicio;
 import com.ysoberon.homework.modelo.EjercicioExamen;
 import com.ysoberon.homework.modelo.EntidadViewEjercicio;
+import com.ysoberon.homework.modelo.Examen;
 import com.ysoberon.homework.modelo.Plantilla;
 import com.ysoberon.homework.modelo.Respuesta;
 import com.ysoberon.homework.modelo.RespuestaExamen;
 import com.ysoberon.homework.modelo.RespuestasForm;
+import com.ysoberon.homework.modelo.Tipo;
 import com.ysoberon.homework.modelo.Usuario;
 import com.ysoberon.homework.servicios.IAlumnoServicio;
 import com.ysoberon.homework.servicios.ICategoriaServicio;
 import com.ysoberon.homework.servicios.ICursoServicio;
 import com.ysoberon.homework.servicios.IEjercicioServicio;
+import com.ysoberon.homework.servicios.IExamenServicio;
 import com.ysoberon.homework.servicios.IPlantillaServicio;
 import com.ysoberon.homework.servicios.IRespuestaServicio;
 import com.ysoberon.homework.servicios.ITipoServicio;
@@ -58,6 +61,7 @@ import com.ysoberon.homework.util.Utils;
 
 @Controller
 public class Controlador {
+//ALTER TABLE 'EJERCICIO' MODIFY CONSTRAINT 'ejercicio_plantilla' FOREIGN KEY ('id_plantilla') REFERENCES 'plantilla' ('id_plantilla') ON DELETE CASCADE;
 
 	/*
 	 * @Value("${educaapp.ruta.imagenes}") private String ruta;
@@ -88,19 +92,20 @@ public class Controlador {
 	private IRespuestaServicio respuestaServicio;
 
 	@Autowired
+	private IExamenServicio examenServicio;
+
+	@Autowired
 	private PasswordEncoder passwordEncoder;
 
 	// Ruta donde se guardarán las imágenes
 	// @Value("${educapadres.ruta.imagenes}")
 	// private String ruta;
 
-	
-	
 	@GetMapping("/")
 	public String redireccionarPantallaPrincipal() {
 		return "redirect:/home";
 	}
-	
+
 	// La página de login es la página de inicio
 
 	@GetMapping("/login")
@@ -234,12 +239,16 @@ public class Controlador {
 
 		Plantilla plantilla = (Plantilla) session.getAttribute("plantilla");
 		ejercicio.setPlantilla(plantilla);
+		Tipo tipo = new Tipo();
+		tipo.setId_tipo(1);
+		ejercicio.setTipo(tipo);
 		ejercicioServicio.guardarEjercicio(ejercicio);
 		session.setAttribute("ejercicio", ejercicio);
 
 		attributes.addFlashAttribute("msg", "Ejercicio guardado");
 
-		return "redirect:/home";
+		// return "redirect:/home";
+		return "formAgregarEjercicios";
 
 	}
 
@@ -341,6 +350,21 @@ public class Controlador {
 
 	}
 
+	@GetMapping("/registroNotas/{id}")
+	public String mostrarNotas(@PathVariable("id") int id_alumno, Model model, HttpSession session) {
+		Alumno alumno = alumnoServicio.findById(id_alumno);
+		// Cómo coger el id de la plantilla
+		//Plantilla plantilla = (Plantilla) model.getAttribute("plantilla");
+		Plantilla plantilla = plantillaServicio.findById(15);
+		//Plantilla plantilla = (Plantilla) session.getAttribute("plantilla");
+		List<Examen> examenes = examenServicio.findByAlumnoAndPlantilla(alumno, plantilla);
+		model.addAttribute("examenes", examenes);
+		double notaMedia = calcularNotaMedia(examenes);
+		model.addAttribute("notaMedia", notaMedia);
+		return "registroNotas";
+
+	}
+
 	@GetMapping("/editarPlantilla/{id}")
 	public String editarPlantilla(@PathVariable("id") int id_plantilla, Model model, HttpSession session) {
 		Plantilla plantilla = plantillaServicio.findById(id_plantilla);
@@ -404,18 +428,19 @@ public class Controlador {
 		SimpleDateFormat dateFormat = new SimpleDateFormat("dd-mm-yyyy");
 		webDataBinder.registerCustomEditor(Date.class, new CustomDateEditor(dateFormat, false));
 	}
-	
+
 	/**
 	 * Datos básicos de la pantalla hacerExamen
+	 * 
 	 * @param modelo
 	 * @param id_plantilla
 	 */
-	public void getModelHacerExamen( Model modelo, int id_plantilla) {
+	public void getModelHacerExamen(Model modelo, int id_plantilla) {
 		Plantilla plantilla = plantillaServicio.findById(id_plantilla);
 		modelo.addAttribute("plantilla", plantilla);
 	}
-	
-	public Map<EntidadViewEjercicio,List<Respuesta>> getEjercicioRespuestas(List<Ejercicio> listaEjercicios) {
+
+	public Map<EntidadViewEjercicio, List<Respuesta>> getEjercicioRespuestas(List<Ejercicio> listaEjercicios) {
 		Map<EntidadViewEjercicio, List<Respuesta>> ejercicios = new TreeMap<>(Collections.reverseOrder());
 		for (Ejercicio ejercicio : listaEjercicios) {
 			Integer id = ejercicio.getId_ejercicio();
@@ -425,25 +450,26 @@ public class Controlador {
 		}
 		return ejercicios;
 	}
-	
 
 	@GetMapping("/hacerExamen/{id}")
 	public String hacerExamen(@PathVariable("id") int id_plantilla, Model modelo) {
-		getModelHacerExamen(modelo,id_plantilla);
-		Map<EntidadViewEjercicio, List<Respuesta>> ejercicios = getEjercicioRespuestas(ejercicioServicio.findEjerciciosByPlantilla((Plantilla) modelo.getAttribute("plantilla")));
+		getModelHacerExamen(modelo, id_plantilla);
+		Map<EntidadViewEjercicio, List<Respuesta>> ejercicios = getEjercicioRespuestas(
+				ejercicioServicio.findEjerciciosByPlantilla((Plantilla) modelo.getAttribute("plantilla")));
 		modelo.addAttribute("ejercicios", ejercicios);
 		return "hacerExamen";
 	}
 
 	@PostMapping("/hacerExamen/validar")
 	public String hacerExamenValidacion(@RequestBody() MultiValueMap<String, String> formData, Model modelo) {
+		double contadorRespuestaOk=0.0;
 		List<RespuestaExamen> respuestasExamen = new ArrayList<>();
 		List<Ejercicio> ejercicios = new ArrayList<>();
 		Iterator it = formData.entrySet().iterator();
-		// Skip csrf 
+		// Skip csrf
 		it.next();
-		//IdPlantilla
-		Integer idPlantilla = Integer.parseInt((String) ((ArrayList) ((Entry)it.next()).getValue()).get(0));
+		// IdPlantilla
+		Integer idPlantilla = Integer.parseInt((String) ((ArrayList) ((Entry) it.next()).getValue()).get(0));
 		while (it.hasNext()) {
 			RespuestaExamen respuestaExamen = new RespuestaExamen();
 			Entry entry = (Entry) it.next();
@@ -455,16 +481,29 @@ public class Controlador {
 			Respuesta respuesta = respuestaServicio.findRespuestaById(idRespuesta).get();
 			respuestaExamen.setRespuesta(respuesta);
 			respuestaExamen.setCorrecta(respuesta.isCorrecta());
-			List<Respuesta> r = respuestaServicio.findByCorrectaAndEjercicio(true,ejercicio);
-			if ( !r.isEmpty() ) {
+			List<Respuesta> r = respuestaServicio.findByCorrectaAndEjercicio(true, ejercicio);
+			if (!r.isEmpty()) {
 				respuestaExamen.setRespuestaCorrecta(r.get(0));
+				if(respuestaExamen.getCorrecta()) contadorRespuestaOk++;
 			}
-			//respuestaExamen.setRespuestaCorrecta(respuestaServicio.obtenerRespuestaCorrecta(true));
+			// respuestaExamen.setRespuestaCorrecta(respuestaServicio.obtenerRespuestaCorrecta(true));
 			respuestasExamen.add(respuestaExamen);
 		}
-		getModelHacerExamen(modelo,idPlantilla);
-		modelo.addAttribute("ejercicios",getEjercicioRespuestas(ejercicios));
+		getModelHacerExamen(modelo, idPlantilla);
+		modelo.addAttribute("ejercicios", getEjercicioRespuestas(ejercicios));
 		modelo.addAttribute("listValidacion", respuestasExamen);
+		
+		//insertamos resultado en la tabla Examen
+		Plantilla plantilla=plantillaServicio.findById(idPlantilla);
+		Alumno alumno=alumnoServicio.findById(76);//jon
+		Examen examen= new Examen();
+		examen.setNota(contadorRespuestaOk);
+		examen.setPlantilla(plantilla);
+		examen.setAlumno(alumno);
+	  
+	//	examen.setFecha(Now());
+		examenServicio.guardarExamen(examen);
+		
 		return "hacerExamen";
 	}
 
@@ -473,6 +512,18 @@ public class Controlador {
 	public String encriptar(@PathVariable("texto") String texto) {
 
 		return texto + " : " + passwordEncoder.encode(texto);
+
+	}
+
+	private double calcularNotaMedia(List<Examen> examenes) {
+
+		double total = 0.0;
+		for (Examen examen : examenes) {
+
+			total += examen.getNota();
+		}
+
+		return total / examenes.size();
 
 	}
 
