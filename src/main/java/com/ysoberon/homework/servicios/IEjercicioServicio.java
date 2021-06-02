@@ -12,5 +12,6 @@ public interface IEjercicioServicio {
 	public Optional<Ejercicio> findEjercicioById(Integer  id_ejercicio);
 	public List<Ejercicio> findEjercicioByNombre(String  nombre);
 	public List<Ejercicio> findEjerciciosByPlantilla(Plantilla plantilla);
+	void eliminarEjercicio(Integer idEjercicio);
 
 }

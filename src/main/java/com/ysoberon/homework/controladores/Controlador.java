@@ -224,7 +224,8 @@ public class Controlador {
 		alumnoServicio.guardarAlumno(alumno1);
 		attributes.addFlashAttribute("msg", "Alumno guardado");
 
-		return "redirect:/home";
+		//return "redirect:/home";
+		return "ventanaAlumno";
 		// return "formAgregarEjercicios";
 
 	}
@@ -256,13 +257,24 @@ public class Controlador {
 	public String insertarRespuestas(@ModelAttribute("respuestasForm") RespuestasForm respuestasForm,
 			BindingResult result, RedirectAttributes attributes, Model modelo, HttpSession session) {
 		Ejercicio ejercicio = (Ejercicio) session.getAttribute("ejercicio");
+		 int correcta=respuestasForm.getRespuestaCorrecta();
+		 int contador=0;
 		for (Respuesta respuesta : respuestasForm.getRespuestas()) {
+			 
+			 
 			respuesta.setEjercicio(ejercicio);
+			   if(contador==correcta) {
+				   respuesta.setCorrecta(true);
+			   }
 			respuestaServicio.guardarRespuesta(respuesta);
+			
+			contador++;
 		}
-
+		
+       
 		System.out.println(modelo);
-		return "redirect:/home";
+	//	return "redirect:/home";
+		return "formAgregarEjercicios";
 
 	}
 
@@ -313,6 +325,13 @@ public class Controlador {
 		attributes.addFlashAttribute("msg", "Alumno eliminado");
 		return "redirect:/home";
 	}
+	
+	@GetMapping("/eliminarEjercicio/{id}")
+	public String eliminarEjercicio(@PathVariable("id") int id_ejercicio, RedirectAttributes attributes) {
+		ejercicioServicio.eliminarEjercicio(id_ejercicio);
+		attributes.addFlashAttribute("msg", "Ejercicio eliminado");
+		return "redirect:/home";
+	}
 
 	@GetMapping("/eliminarPlantilla/{id}")
 	public String eliminarPlantilla(@PathVariable("id") int id_plantilla, RedirectAttributes attributes) {
@@ -355,7 +374,8 @@ public class Controlador {
 		Alumno alumno = alumnoServicio.findById(id_alumno);
 		// Cómo coger el id de la plantilla
 		//Plantilla plantilla = (Plantilla) model.getAttribute("plantilla");
-		Plantilla plantilla = plantillaServicio.findById(15);
+		//Plantilla plantilla = plantillaServicio.findById(15);
+		Plantilla plantilla=(Plantilla) session.getAttribute("plantilla");
 		//Plantilla plantilla = (Plantilla) session.getAttribute("plantilla");
 		List<Examen> examenes = examenServicio.findByAlumnoAndPlantilla(alumno, plantilla);
 		model.addAttribute("examenes", examenes);
@@ -435,9 +455,10 @@ public class Controlador {
 	 * @param modelo
 	 * @param id_plantilla
 	 */
-	public void getModelHacerExamen(Model modelo, int id_plantilla) {
+	public void getModelHacerExamen(Model modelo, int id_plantilla,HttpSession session) {
 		Plantilla plantilla = plantillaServicio.findById(id_plantilla);
 		modelo.addAttribute("plantilla", plantilla);
+		session.setAttribute("plantilla", plantilla);
 	}
 
 	public Map<EntidadViewEjercicio, List<Respuesta>> getEjercicioRespuestas(List<Ejercicio> listaEjercicios) {
@@ -452,8 +473,8 @@ public class Controlador {
 	}
 
 	@GetMapping("/hacerExamen/{id}")
-	public String hacerExamen(@PathVariable("id") int id_plantilla, Model modelo) {
-		getModelHacerExamen(modelo, id_plantilla);
+	public String hacerExamen(@PathVariable("id") int id_plantilla, Model modelo,HttpSession session) {
+		getModelHacerExamen(modelo, id_plantilla,session);
 		Map<EntidadViewEjercicio, List<Respuesta>> ejercicios = getEjercicioRespuestas(
 				ejercicioServicio.findEjerciciosByPlantilla((Plantilla) modelo.getAttribute("plantilla")));
 		modelo.addAttribute("ejercicios", ejercicios);
@@ -461,7 +482,7 @@ public class Controlador {
 	}
 
 	@PostMapping("/hacerExamen/validar")
-	public String hacerExamenValidacion(@RequestBody() MultiValueMap<String, String> formData, Model modelo) {
+	public String hacerExamenValidacion(@RequestBody() MultiValueMap<String, String> formData, Model modelo,HttpSession session) {
 		double contadorRespuestaOk=0.0;
 		List<RespuestaExamen> respuestasExamen = new ArrayList<>();
 		List<Ejercicio> ejercicios = new ArrayList<>();
@@ -489,13 +510,14 @@ public class Controlador {
 			// respuestaExamen.setRespuestaCorrecta(respuestaServicio.obtenerRespuestaCorrecta(true));
 			respuestasExamen.add(respuestaExamen);
 		}
-		getModelHacerExamen(modelo, idPlantilla);
+		getModelHacerExamen(modelo, idPlantilla,session);
 		modelo.addAttribute("ejercicios", getEjercicioRespuestas(ejercicios));
 		modelo.addAttribute("listValidacion", respuestasExamen);
 		
 		//insertamos resultado en la tabla Examen
 		Plantilla plantilla=plantillaServicio.findById(idPlantilla);
-		Alumno alumno=alumnoServicio.findById(76);//jon
+		Alumno alumno=(Alumno) session.getAttribute("alumno") ;
+	//	Alumno alumno=alumnoServicio.findById(76);//jon
 		Examen examen= new Examen();
 		examen.setNota(contadorRespuestaOk);
 		examen.setPlantilla(plantilla);
