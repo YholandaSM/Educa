@@ -223,12 +223,39 @@ public class Controlador {
 		alumno1.agregarPlantilla(alumno.getPlantilla());
 		alumnoServicio.guardarAlumno(alumno1);
 		attributes.addFlashAttribute("msg", "Alumno guardado");
-
-		//return "redirect:/home";
+		// return "redirect:/home";
 		return "ventanaAlumno";
 		// return "formAgregarEjercicios";
-
 	}
+	
+	@PostMapping("/almacenarNuevoEjercicio")
+	public String insertarEjercicioConRespuestas(Ejercicio ejercicio, @ModelAttribute("respuestasForm") RespuestasForm respuestasForm, BindingResult result, Model model, HttpSession session) {
+		
+		Plantilla plantilla = (Plantilla) session.getAttribute("plantilla");
+		ejercicio.setPlantilla(plantilla);
+		Tipo tipo = new Tipo();
+		tipo.setId_tipo(1);
+		ejercicio.setTipo(tipo);
+		//TODO insertar ejercicio y obtener el id_ejercicio.
+		Ejercicio ejercicioInsertado = ejercicioServicio.guardarEjercicio(ejercicio);
+		//TODO hacer set del id_ejercicio en cada respuesta.
+		List<Respuesta> respuestas = respuestasForm.getRespuestas();
+		for (Respuesta respuesta : respuestas) {
+			respuesta.setEjercicio(ejercicioInsertado);
+			//TODO insertar las posibles respuestas.
+			respuestaServicio.guardarRespuesta(respuesta);
+		}		
+		model.addAttribute("plantillaAEditar", plantilla);
+		model.addAttribute("ejercicios", ejercicioServicio.findEjerciciosByPlantilla(plantilla));
+		
+		
+		
+		return "formAgregarEjercicios";
+	}
+	
+	
+	
+	
 
 	@PostMapping("/guardarEjercicio")
 	public String insertarEjercicio(Ejercicio ejercicio, BindingResult result, RedirectAttributes attributes,
@@ -257,24 +284,29 @@ public class Controlador {
 	public String insertarRespuestas(@ModelAttribute("respuestasForm") RespuestasForm respuestasForm,
 			BindingResult result, RedirectAttributes attributes, Model modelo, HttpSession session) {
 		Ejercicio ejercicio = (Ejercicio) session.getAttribute("ejercicio");
-		 int correcta=respuestasForm.getRespuestaCorrecta();
-		 int contador=0;
-		for (Respuesta respuesta : respuestasForm.getRespuestas()) {
-			 
-			 
-			respuesta.setEjercicio(ejercicio);
-			   if(contador==correcta) {
-				   respuesta.setCorrecta(true);
-			   }
-			respuestaServicio.guardarRespuesta(respuesta);
+		int correcta = respuestasForm.getRespuestaCorrecta();
+		//if (correcta != 3) {
+
+			int contador = 0;
+			for (Respuesta respuesta : respuestasForm.getRespuestas()) {
+
+				respuesta.setEjercicio(ejercicio);
+				if (contador == correcta) {
+					respuesta.setCorrecta(true);
+				}
+				respuestaServicio.guardarRespuesta(respuesta);
+
+				contador++;
+			}
+
+			System.out.println(modelo);
+			// return "redirect:/home";
+			return "formAgregarEjercicios";
+
+		//}else {
 			
-			contador++;
-		}
-		
-       
-		System.out.println(modelo);
-	//	return "redirect:/home";
-		return "formAgregarEjercicios";
+			//return "error";
+		//}
 
 	}
 
@@ -300,7 +332,7 @@ public class Controlador {
 
 	}
 
-	@PostMapping("/guardarUsuario")
+	@PostMapping("guardarUsuario")
 	public String insertarUsuario(Usuario usuario, BindingResult result, RedirectAttributes attributes) {
 
 		String pwdPlano = usuario.getPassword();
@@ -315,7 +347,7 @@ public class Controlador {
 		usuarioServicio.guardar(usuario);
 		attributes.addFlashAttribute("msg", "Usuario guardado");
 
-		return "redirect:/home";
+		return "home";
 
 	}
 
@@ -325,7 +357,7 @@ public class Controlador {
 		attributes.addFlashAttribute("msg", "Alumno eliminado");
 		return "redirect:/home";
 	}
-	
+
 	@GetMapping("/eliminarEjercicio/{id}")
 	public String eliminarEjercicio(@PathVariable("id") int id_ejercicio, RedirectAttributes attributes) {
 		ejercicioServicio.eliminarEjercicio(id_ejercicio);
@@ -369,18 +401,19 @@ public class Controlador {
 
 	}
 
-	@GetMapping("/registroNotas/{id}")
-	public String mostrarNotas(@PathVariable("id") int id_alumno, Model model, HttpSession session) {
+	@GetMapping("/registroNotas/{id}/{id_plantilla}")
+	public String mostrarNotas(@PathVariable("id") int id_alumno,@PathVariable("id_plantilla") int id_plantilla, Model model, HttpSession session) {
 		Alumno alumno = alumnoServicio.findById(id_alumno);
 		// Cómo coger el id de la plantilla
-		//Plantilla plantilla = (Plantilla) model.getAttribute("plantilla");
-		//Plantilla plantilla = plantillaServicio.findById(15);
-		Plantilla plantilla=(Plantilla) session.getAttribute("plantilla");
+		// Plantilla plantilla = (Plantilla) model.getAttribute("plantilla");
+		// Plantilla plantilla = plantillaServicio.findById(15);
 		//Plantilla plantilla = (Plantilla) session.getAttribute("plantilla");
+		// Plantilla plantilla = (Plantilla) session.getAttribute("plantilla");
+		Plantilla plantilla = plantillaServicio.findById(id_plantilla);
 		List<Examen> examenes = examenServicio.findByAlumnoAndPlantilla(alumno, plantilla);
 		model.addAttribute("examenes", examenes);
 		double notaMedia = calcularNotaMedia(examenes);
-		model.addAttribute("notaMedia", notaMedia);
+		model.addAttribute("notaMedia", String.format("%.2f", notaMedia));
 		return "registroNotas";
 
 	}
@@ -388,7 +421,6 @@ public class Controlador {
 	@GetMapping("/editarPlantilla/{id}")
 	public String editarPlantilla(@PathVariable("id") int id_plantilla, Model model, HttpSession session) {
 		Plantilla plantilla = plantillaServicio.findById(id_plantilla);
-
 		session.setAttribute("plantilla", plantilla);
 		model.addAttribute("plantillaAEditar", plantilla);
 		model.addAttribute("ejercicios", ejercicioServicio.findEjerciciosByPlantilla(plantilla));
@@ -455,7 +487,7 @@ public class Controlador {
 	 * @param modelo
 	 * @param id_plantilla
 	 */
-	public void getModelHacerExamen(Model modelo, int id_plantilla,HttpSession session) {
+	public void getModelHacerExamen(Model modelo, int id_plantilla, HttpSession session) {
 		Plantilla plantilla = plantillaServicio.findById(id_plantilla);
 		modelo.addAttribute("plantilla", plantilla);
 		session.setAttribute("plantilla", plantilla);
@@ -473,8 +505,8 @@ public class Controlador {
 	}
 
 	@GetMapping("/hacerExamen/{id}")
-	public String hacerExamen(@PathVariable("id") int id_plantilla, Model modelo,HttpSession session) {
-		getModelHacerExamen(modelo, id_plantilla,session);
+	public String hacerExamen(@PathVariable("id") int id_plantilla, Model modelo, HttpSession session) {
+		getModelHacerExamen(modelo, id_plantilla, session);
 		Map<EntidadViewEjercicio, List<Respuesta>> ejercicios = getEjercicioRespuestas(
 				ejercicioServicio.findEjerciciosByPlantilla((Plantilla) modelo.getAttribute("plantilla")));
 		modelo.addAttribute("ejercicios", ejercicios);
@@ -482,8 +514,9 @@ public class Controlador {
 	}
 
 	@PostMapping("/hacerExamen/validar")
-	public String hacerExamenValidacion(@RequestBody() MultiValueMap<String, String> formData, Model modelo,HttpSession session) {
-		double contadorRespuestaOk=0.0;
+	public String hacerExamenValidacion(@RequestBody() MultiValueMap<String, String> formData, Model modelo,
+			HttpSession session) {
+		double contadorRespuestaOk = 0.0;
 		List<RespuestaExamen> respuestasExamen = new ArrayList<>();
 		List<Ejercicio> ejercicios = new ArrayList<>();
 		Iterator it = formData.entrySet().iterator();
@@ -505,27 +538,27 @@ public class Controlador {
 			List<Respuesta> r = respuestaServicio.findByCorrectaAndEjercicio(true, ejercicio);
 			if (!r.isEmpty()) {
 				respuestaExamen.setRespuestaCorrecta(r.get(0));
-				if(respuestaExamen.getCorrecta()) contadorRespuestaOk++;
+				if (respuestaExamen.getCorrecta())
+					contadorRespuestaOk++;
 			}
 			// respuestaExamen.setRespuestaCorrecta(respuestaServicio.obtenerRespuestaCorrecta(true));
 			respuestasExamen.add(respuestaExamen);
 		}
-		getModelHacerExamen(modelo, idPlantilla,session);
+		getModelHacerExamen(modelo, idPlantilla, session);
 		modelo.addAttribute("ejercicios", getEjercicioRespuestas(ejercicios));
 		modelo.addAttribute("listValidacion", respuestasExamen);
-		
-		//insertamos resultado en la tabla Examen
-		Plantilla plantilla=plantillaServicio.findById(idPlantilla);
-		Alumno alumno=(Alumno) session.getAttribute("alumno") ;
-	//	Alumno alumno=alumnoServicio.findById(76);//jon
-		Examen examen= new Examen();
+
+		// insertamos resultado en la tabla Examen
+		Plantilla plantilla = plantillaServicio.findById(idPlantilla);
+		Alumno alumno = (Alumno) session.getAttribute("alumno");
+		// Alumno alumno=alumnoServicio.findById(76);//jon
+		Examen examen = new Examen();
 		examen.setNota(contadorRespuestaOk);
 		examen.setPlantilla(plantilla);
 		examen.setAlumno(alumno);
-	  
-	//	examen.setFecha(Now());
+		examen.setFecha(new Date(System.currentTimeMillis()));
 		examenServicio.guardarExamen(examen);
-		
+
 		return "hacerExamen";
 	}
 
@@ -538,14 +571,17 @@ public class Controlador {
 	}
 
 	private double calcularNotaMedia(List<Examen> examenes) {
-
-		double total = 0.0;
-		for (Examen examen : examenes) {
-
-			total += examen.getNota();
+		
+		if (!examenes.isEmpty()) {
+			double total = 0.0;
+			for (Examen examen : examenes) {
+				total += examen.getNota();
+			}
+			return total / examenes.size();			
 		}
 
-		return total / examenes.size();
+		return 0.0;
+		
 
 	}
 
