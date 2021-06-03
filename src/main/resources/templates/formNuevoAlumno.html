@@ -11,6 +11,10 @@
 <body>
 	<header th:insert="fragments/cabecera.html :: cabecera"></header>
 	<div class="container">
+	<br>
+	<div class="text-end">
+		<a class="btn"  style="background-color:#ffdac4;" th:href="@{/}">Salir</a>
+	</div>
 		<br>
 		<form th:action="@{/guardarAlumno}" method="post" th:object="${alumno}" enctype="multipart/form-data">
 		

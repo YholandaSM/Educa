@@ -19,6 +19,11 @@
 	<main role="main">
 
 		<div class="container">
+		<br>
+			<div class="text-end">
+		<a class="btn" style="background-color:#ffdac4;" th:href="@{/logout}">Salir</a>
+	</div>
+		 <h3><td th:text="${usuario.nombre}"></td> </h3>
 		<br><br>
 <a th:href="@{/nuevoAlumno}" class=" btn  " style="background-color:#9cfc97;">Nuevo alumno</a>
 	<a th:href="@{/nuevaPlantilla}" class=" btn  " style="background-color:#9cfc97;">Nueva
@@ -133,8 +138,7 @@
 			</div>
 			<!-- /card -->
 			
-			<br>
-<a class="btn" style="background-color:#ffdac4;" th:href="@{/logout}">Salir</a>
+		 
 		</div>
 		<!-- /container -->
 

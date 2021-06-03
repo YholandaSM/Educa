@@ -213,7 +213,7 @@ public class Controlador {
 
 	@PostMapping("/guardarAlumnoPlantilla")
 	public String insertarAlumnoPlantilla(Alumno alumno, BindingResult result, RedirectAttributes attributes,
-			Model modelo) {
+			Model model) {
 
 		if (result.hasErrors()) {
 			return "formNuevoAlumno";
@@ -221,43 +221,64 @@ public class Controlador {
 
 		Alumno alumno1 = alumnoServicio.findById(alumno.getId_alumno());
 		alumno1.agregarPlantilla(alumno.getPlantilla());
+	
 		alumnoServicio.guardarAlumno(alumno1);
 		attributes.addFlashAttribute("msg", "Alumno guardado");
-		// return "redirect:/home";
-		return "ventanaAlumno";
-		// return "formAgregarEjercicios";
+		 
+		model.addAttribute("plantillasAlumno", alumno1.getPlantillas());
+	//	return "redirect:/ventanaAlumno";
+		 
+		 return "ventanaAlumno";
 	}
 	
 	@PostMapping("/almacenarNuevoEjercicio")
 	public String insertarEjercicioConRespuestas(Ejercicio ejercicio, @ModelAttribute("respuestasForm") RespuestasForm respuestasForm, BindingResult result, Model model, HttpSession session) {
 		
+		
+		
 		Plantilla plantilla = (Plantilla) session.getAttribute("plantilla");
+		List<Ejercicio> ejercicios=ejercicioServicio.findEjerciciosByPlantilla(plantilla);
+		if(ejercicios.size()<10) {
+		
 		ejercicio.setPlantilla(plantilla);
 		Tipo tipo = new Tipo();
 		tipo.setId_tipo(1);
 		ejercicio.setTipo(tipo);
+		int correcta = respuestasForm.getRespuestaCorrecta();
 		//TODO insertar ejercicio y obtener el id_ejercicio.
 		Ejercicio ejercicioInsertado = ejercicioServicio.guardarEjercicio(ejercicio);
 		//TODO hacer set del id_ejercicio en cada respuesta.
 		List<Respuesta> respuestas = respuestasForm.getRespuestas();
+		int contador = 0;
 		for (Respuesta respuesta : respuestas) {
 			respuesta.setEjercicio(ejercicioInsertado);
+			if (contador == correcta) {
+				respuesta.setCorrecta(true);
+			}
 			//TODO insertar las posibles respuestas.
 			respuestaServicio.guardarRespuesta(respuesta);
+			contador++;
 		}		
 		model.addAttribute("plantillaAEditar", plantilla);
 		model.addAttribute("ejercicios", ejercicioServicio.findEjerciciosByPlantilla(plantilla));
 		
-		
+	
 		
 		return "formAgregarEjercicios";
+		
+		}
+		else {
+			
+			System.out.println("El máximo de ejercicios es 10");
+			return "formAgregarEjercicios";
+		}
 	}
 	
 	
 	
 	
 
-	@PostMapping("/guardarEjercicio")
+	/*@PostMapping("/guardarEjercicio")
 	public String insertarEjercicio(Ejercicio ejercicio, BindingResult result, RedirectAttributes attributes,
 			Model modelo, HttpSession session) {
 
@@ -278,9 +299,9 @@ public class Controlador {
 		// return "redirect:/home";
 		return "formAgregarEjercicios";
 
-	}
+	}*/
 
-	@PostMapping("/guardarRespuestas")
+	/*@PostMapping("/guardarRespuestas")
 	public String insertarRespuestas(@ModelAttribute("respuestasForm") RespuestasForm respuestasForm,
 			BindingResult result, RedirectAttributes attributes, Model modelo, HttpSession session) {
 		Ejercicio ejercicio = (Ejercicio) session.getAttribute("ejercicio");
@@ -308,7 +329,7 @@ public class Controlador {
 			//return "error";
 		//}
 
-	}
+	}*/
 
 	@PostMapping("/guardarPlantilla")
 	public String insertarPlantilla(Plantilla plantilla, BindingResult result, Model modelo,
@@ -327,8 +348,8 @@ public class Controlador {
 		List<Plantilla> lista = plantillaServicio.findPlantillasByNombre(plantilla.getNombre());
 		Integer plantillaCreada = lista.get(0).getId_plantilla();
 		System.out.println(plantillaCreada + "plantillaCreada");
-		// return "redirect:/home";
-		return "formAgregarEjercicios";
+		 return "redirect:/home";
+		//return "formAgregarEjercicios";
 
 	}
 
@@ -342,7 +363,7 @@ public class Controlador {
 		if (result.hasErrors()) {
 			return "formRegistro";
 		}
-
+        
 		usuario.setEstatus(1);
 		usuarioServicio.guardar(usuario);
 		attributes.addFlashAttribute("msg", "Usuario guardado");
