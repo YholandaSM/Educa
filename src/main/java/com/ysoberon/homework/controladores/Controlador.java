@@ -166,8 +166,8 @@ public class Controlador {
 	}
 
 	@GetMapping("/nuevoAlumno")
-	public String crearNuevoAlumno(Alumno alumno) {
-
+	public String crearNuevoAlumno(Alumno alumno, Model model) {
+		model.addAttribute("enableBack", true);
 		return "formNuevoAlumno";
 
 	}
@@ -260,9 +260,8 @@ public class Controlador {
 			contador++;
 		}		
 		model.addAttribute("plantillaAEditar", plantilla);
-		model.addAttribute("ejercicios", ejercicioServicio.findEjerciciosByPlantilla(plantilla));
-		
-	
+		model.addAttribute("ejercicios", ejercicioServicio.findEjerciciosByPlantilla(plantilla));		
+		model.addAttribute("enableBack", true);
 		
 		return "formAgregarEjercicios";
 		
@@ -417,9 +416,7 @@ public class Controlador {
 		model.addAttribute("alumno", alumno);
 		session.setAttribute("alumno", alumno);
 		model.addAttribute("plantillasAlumno", plantillas);
-
 		return "ventanaAlumno";
-
 	}
 
 	@GetMapping("/registroNotas/{id}/{id_plantilla}")
@@ -445,6 +442,7 @@ public class Controlador {
 		session.setAttribute("plantilla", plantilla);
 		model.addAttribute("plantillaAEditar", plantilla);
 		model.addAttribute("ejercicios", ejercicioServicio.findEjerciciosByPlantilla(plantilla));
+		model.addAttribute("enableBack", true);
 		return "formAgregarEjercicios";
 	}
 
@@ -531,6 +529,7 @@ public class Controlador {
 		Map<EntidadViewEjercicio, List<Respuesta>> ejercicios = getEjercicioRespuestas(
 				ejercicioServicio.findEjerciciosByPlantilla((Plantilla) modelo.getAttribute("plantilla")));
 		modelo.addAttribute("ejercicios", ejercicios);
+		modelo.addAttribute("enableBack", true);
 		return "hacerExamen";
 	}
 
@@ -538,6 +537,7 @@ public class Controlador {
 	public String hacerExamenValidacion(@RequestBody() MultiValueMap<String, String> formData, Model modelo,
 			HttpSession session) {
 		double contadorRespuestaOk = 0.0;
+		int contadorEjercicios = 0;
 		List<RespuestaExamen> respuestasExamen = new ArrayList<>();
 		List<Ejercicio> ejercicios = new ArrayList<>();
 		Iterator it = formData.entrySet().iterator();
@@ -564,6 +564,7 @@ public class Controlador {
 			}
 			// respuestaExamen.setRespuestaCorrecta(respuestaServicio.obtenerRespuestaCorrecta(true));
 			respuestasExamen.add(respuestaExamen);
+			contadorEjercicios++;
 		}
 		getModelHacerExamen(modelo, idPlantilla, session);
 		modelo.addAttribute("ejercicios", getEjercicioRespuestas(ejercicios));
@@ -579,7 +580,8 @@ public class Controlador {
 		examen.setAlumno(alumno);
 		examen.setFecha(new Date(System.currentTimeMillis()));
 		examenServicio.guardarExamen(examen);
-
+		modelo.addAttribute("notaExamen",contadorRespuestaOk+" / "+contadorEjercicios);
+		modelo.addAttribute("enableBack", true);
 		return "hacerExamen";
 	}
 

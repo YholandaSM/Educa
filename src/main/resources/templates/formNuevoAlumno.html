@@ -2,22 +2,13 @@
 <html xmlns:th="http://www.thymeleaf.org">
 
 <head>
-<meta charset="ISO-8859-1">
-<!-- Bootstrap CSS -->
-<link th:href="@{/css/bootstrap/bootstrap.min.css}" rel="stylesheet"
-	type="text/css" href="../static/css/bootstrap.min.css">
+<th:block th:insert="fragments/recursos.html :: recursos"></th:block>
 <title>Crear alumno</title>
 </head>
 <body>
-	<header th:insert="fragments/cabecera.html :: cabecera"></header>
-	<div class="container">
-	<br>
-	<div class="text-end">
-		<a class="btn"  style="background-color:#ffdac4;" th:href="@{/}">Salir</a>
-	</div>
-		<br>
-		<form th:action="@{/guardarAlumno}" method="post" th:object="${alumno}" enctype="multipart/form-data">
-		
+	<header th:insert="fragments/header.html :: header"></header>
+	<div class="container mt-3">
+		<form th:action="@{/guardarAlumno}" method="post" th:object="${alumno}" enctype="multipart/form-data">		
 		<div th:if="${#fields.hasErrors('*')}" class='alert alert-danger' role='alert'>
 			Por favor corrija los siguientes errores:
 			<ul>
@@ -54,5 +45,7 @@
 		 </form>
 			
 	</div>
+	
+	 <footer th:insert="fragments/footer :: pie-pagina" class="footer"></footer>
 </body>
 </html>
