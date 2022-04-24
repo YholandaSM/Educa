@@ -185,7 +185,10 @@ public class Controlador {
 		return "formRegistro";
 
 	}
-
+        
+	
+	 
+         //Método para guardar un alumno
 	@PostMapping("/guardarAlumno")
 	public String insertarAlumno(Alumno alumno, BindingResult result, RedirectAttributes attributes, Model modelo,
 			@RequestParam("archivoImagen") MultipartFile multiPart) {
