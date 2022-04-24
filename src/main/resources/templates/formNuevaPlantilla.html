@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+<meta charset="ISO-8859-1">
+
+<th:block th:insert="fragments/recursos.html :: recursos"></th:block>
+<title>Insert title here</title>
+</head>
+<body>
+
+<header th:insert="fragments/header.html :: header"></header>
+<div class="container">
+<br>
+	 
+
+<form th:action="@{/guardarPlantilla}" method="post" th:object="${plantilla}" enctype="multipart/form-data">
+
+<div th:if="${#fields.hasErrors('*')}" class='alert alert-danger' role='alert'>
+			Por favor corrija los siguientes errores:
+			<ul>
+			<li th:each="err : ${#fields.errors('*')}" th:text="${err}" />
+			</ul>
+	        </div>
+		 <div class="row">
+                <div class="col-md-3"> 
+                  <div class="form-group">
+                    <label for="nombre">Nombre</label>
+                    <input type="hidden" th:field="*{id_plantilla}">
+                    
+                    <input type="text" th:field="*{nombre}" class="form-control" id="nombre" name="nombre" placeholder="Nombre" required="required">
+                  </div>
+                </div>
+                <div class="col-md-9"> 
+                  <div class="form-group">
+                    <label for="detalles">Detalles</label>
+                    <input type="text" th:field="*{detalles}" class="form-control" id="detalles" name="detalles" placeholder="Breve descripcion de la plantilla" required="required">
+                  </div> 
+                </div>    
+              </div>    
+		 
+		  <div class="row">
+                <div class="col-md-3"> 
+                  <div class="form-group">
+                    <label for="categoria">Categor&iacute;a</label>
+                    <select class="form-control" name="categoria" th:field="*{categoria.id_categoria}" id="categoria">
+                      <option th:each="categoria : ${categorias}" 
+								th:value="${categoria.id_categoria}"
+								th:text="${categoria.nombre}">
+					  </option>
+                    </select>
+                  </div>
+                </div>
+                
+                 </div>
+
+
+			 
+		<br>
+
+	 
+		 <input class="btn" style="background-color:#aa3e98;"  type="submit" value="Guardar">
+		 
+		 </form>
+		</div>		
+ <footer th:insert="fragments/footer :: pie-pagina" class="footer"></footer>
+</body>
+</html>

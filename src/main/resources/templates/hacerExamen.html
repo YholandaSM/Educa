@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+	<th:block th:insert="fragments/recursos.html :: recursos"></th:block>
+	<title>Formulario examen</title>
+</head>
+<body>
+	<header th:insert="fragments/header.html :: header"></header>
+	<div class="container">
+
+
+	
+		<script th:inline="javascript">
+			// https://stackoverflow.com/questions/25687816
+			/*<![CDATA[*/
+	 		document.addEventListener('DOMContentLoaded',function(){	 		
+	 		
+		 		let nota = [[${notaExamen}]];
+		 		
+		 		if ( nota !== null && nota !== undefined ) {
+		 			// https://sweetalert.js.org/guides/	 		
+		 			swal(nota);
+		 		}
+	 		
+	 		});
+	 		/*]]>*/
+	 	</script>
+
+		<div class="row">
+			<div class="col-12">
+				<div class="card mt-4">
+					<h4 class="card-header"
+						th:text="${plantilla.nombre}+'-'+${plantilla.detalles}"></h4>
+
+					<div th:if="${listValidacion != null }">
+
+						<div class="card-body">
+							<th:block th:each="element:${ejercicios}">
+								<h6 class="card-title">
+									<strong><span th:text="${element.key.enunciado}"></span>
+										- <small th:text="${element.key.nombre}"></small></strong>
+								</h6>
+								<th:block th:each="validacion:${listValidacion}">
+									<th:block th:each="respuesta:${element.value}">
+										<div class="form-check"
+											th:if="${element.key.id == validacion.ejercicio.id_ejercicio}">
+											<input aria-describedby="respuestaF"
+												th:class="${validacion.correcta && 
+												validacion.respuesta.id_respuesta == respuesta.id_respuesta 
+												? 'form-check-input is-valid' :
+												!validacion.correcta && validacion.respuesta.id_respuesta == respuesta.id_respuesta 
+												? 'form-check-input is-invalid' : 'form-check-input'}"
+												th:name="${element.key.id}" class="form-check-input"
+												type="radio" th:value="${respuesta.id_respuesta}"> <label
+												class="form-check-label" for="flexCheckDefault"
+												th:text="${respuesta.enunciado}"></label>
+											<div id="respuestaF" class="invalid-feedback">
+												<div th:if="${validacion.respuestaCorrecta != null}">
+													La correcta era : <span
+														th:text="${validacion.respuestaCorrecta.enunciado}"></span>
+												</div>
+											</div>
+										</div>
+									</th:block>
+								</th:block>
+							</th:block>
+						</div>
+					</div>
+					<!--   -->
+
+					<div th:if="${listValidacion == null }">
+
+						<div class="card-body">
+							<!--  <span th:text="${ejercicios}"></span> -->
+							<form name="examen" method="POST" action="#"
+								th:action="@{/hacerExamen/validar/}">
+								<input type="hidden" th:name="id_plantilla"
+									th:value="${plantilla.id_plantilla}" />
+								<div class="form-check" th:each="element:${ejercicios}">
+									<span th:text="${element.key.enunciado}"></span> <span
+										th:text="${element.key.nombre}"></span>
+									<div th:each="respuesta:${element.value}">
+										<div class="form-check">
+											<input th:name="${element.key.id}" class="form-check-input"
+												type="radio" th:value="${respuesta.id_respuesta}"> <label
+												class="form-check-label" for="flexCheckDefault"> <span
+												th:text="${respuesta.enunciado}"></span> <br>
+											</label>
+										</div>
+									</div>
+								</div>
+								<button type="submit" style="background-color: #aa3398;" class="btn btn-success">Corregir</button>
+							</form>
+						</div>
+
+
+					</div>
+					<!--  end if -->
+
+				</div>
+			</div>
+		</div>
+		<br>
+
+
+	</div>
+
+	<footer th:insert="fragments/footer :: pie-pagina" class="footer"></footer>
+</body>
+</html>

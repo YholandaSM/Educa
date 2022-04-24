@@ -141,7 +141,7 @@ public class Controlador {
 
 		if (session.getAttribute("usuario") == null) {
 			Usuario usuario = usuarioServicio.buscarPorEmail(username);
-			// System.out.println("Usuario: " + usuario);
+			// System.out.println("El usuario es : " + usuario);
 			session.setAttribute("usuario", usuario);
 		}
 
@@ -173,8 +173,8 @@ public class Controlador {
 	}
 
 	@GetMapping("/nuevaPlantilla")
-	public String crearNuevaPlantilla(Plantilla Plantilla) {
-
+	public String crearNuevaPlantilla(Plantilla Plantilla,Model model) {
+		model.addAttribute("enableBack", true);
 		return "formNuevaPlantilla";
 
 	}
@@ -406,6 +406,7 @@ public class Controlador {
 	public String editar(@PathVariable("id") int id_alumno, Model model) {
 		Alumno alumno = alumnoServicio.findById(id_alumno);
 		model.addAttribute("alumno", alumno);
+		model.addAttribute("enableBack", true);
 		return "formNuevoAlumno";
 	}
 
@@ -416,6 +417,7 @@ public class Controlador {
 		model.addAttribute("alumno", alumno);
 		session.setAttribute("alumno", alumno);
 		model.addAttribute("plantillasAlumno", plantillas);
+		model.addAttribute("enableBack", true);
 		return "ventanaAlumno";
 	}
 
@@ -432,6 +434,7 @@ public class Controlador {
 		model.addAttribute("examenes", examenes);
 		double notaMedia = calcularNotaMedia(examenes);
 		model.addAttribute("notaMedia", String.format("%.2f", notaMedia));
+		model.addAttribute("enableBack", true);
 		return "registroNotas";
 
 	}

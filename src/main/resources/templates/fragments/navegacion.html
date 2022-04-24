@@ -1,0 +1,19 @@
+<div th:fragment="navegacion" th:if="${usuario!=null}" class="container">
+	<div class="row">
+		<th:block th:if="${enableBack!=null && enableBack}">
+			<div class="col-4">
+				<div class="text-start mt-4">
+					<a class="btn btn-sm" style="background-color: #ffad0a;"
+						th:href="@{/}"><i class="fa fa-arrow-left"></i> Volver</a>
+				</div>
+			</div>
+		</th:block>
+		<div th:class="${enableBack!=null ? 'col-8' : 'col-12'}">
+			<div class="text-end mt-4">
+				<span th:text="${usuario.nombre}"></span> <a class="btn"
+					style="background-color: #ffdac4;" th:href="@{/logout}">Salir</a>
+			</div>
+		</div>
+	</div>
+</div>
+</div>

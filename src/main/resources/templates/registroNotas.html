@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+<meta charset="ISO-8859-1">
+<title>Notas</title>
+ <th:block th:insert="fragments/recursos.html :: recursos"></th:block>
+
+</head>
+<body>
+	<header th:insert="fragments/header.html :: header"></header>
+	<div class="container">
+		<div class="card mt-3">
+			<h4 class="card-header">
+				<strong>Notas</strong>
+			</h4>
+			<div class="card-body">
+				<div th:if="${msg != null}" class='alert alert-success'
+					th:text="${msg}" role='alert'></div>
+				<table class="table table-hover">
+					<thead class="thead-light">
+						<tr>
+							<th>Nota</th>
+							<th>Fecha</th>
+						</tr>
+					</thead>
+					<tbody>
+						<tr th:each="examen:${examenes}">
+							<td th:text="${examen.nota}"></td>
+							<td th:text="${#dates.format(examen.fecha, 'dd-MM-yyyy')}"></td>
+						</tr>
+						<tr>
+					</tbody>
+				</table>
+			</div>
+			<!-- /cardBody -->
+		</div>
+		<div class="mb-3">
+			<label for="exampleFormControlInput1" class="form-label">Nota
+				media</label> <input type="text" class="form-control"
+				th:value="${notaMedia} " name="notaMedia" id="notaMedia"
+				placeholder="Nota media">
+		</div>
+	  	
+	</div>
+	
+	 <footer th:insert="fragments/footer :: pie-pagina" class="footer"></footer>
+</body>
+</html>

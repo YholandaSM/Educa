@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+	<th:block th:insert="fragments/recursos.html :: recursos"></th:block>
+	<title>Editar plantilla</title>
+</head>
+<body>
+	<header th:insert="fragments/header.html :: header"></header>
+
+	<div class="container  mt-5">
+		<div class="card">
+			<h4 class="card-header">
+				<strong>Listado de Ejercicios</strong>
+			</h4>
+			<div class="card-body">
+				<span th:if="${session.usuario !=null}"
+					th:text="${session.usuario.nombre}"></span>
+				<table class="table table-hover table-condensed">
+					<thead class="thead-light">
+						<tr>
+							<th>Nombre</th>
+							<th>Operaciones</th>
+						</tr>
+					</thead>
+					<tbody>
+						<tr th:each="ejercicio:${ejercicios}">
+							<td th:text="${ejercicio.nombre}+'-'+${ejercicio.enunciado}"></td>
+							<td><a
+								th:href="@{/eliminarEjercicio/{id} (id=${ejercicio.id_ejercicio})}"
+								onclick="return confirm('¿Estás seguro?')"
+								class="btn btn-success btn-sm" role="button" title="Eliminar"><i
+									class="fas fa-trash" aria-hidden="true"></i></a></td>
+						</tr>
+					</tbody>
+				</table>
+			</div>
+		</div>
+	</div>
+
+	<br>
+	<br>
+	<div class="container">
+		<div class="row no-gutters">
+			<div class="col-6 offset-3">
+				<form name="formulario__ModificarPlantilla"
+					th:action="@{/almacenarNuevoEjercicio}" method="POST"
+					th:object="${respuestasForm}">
+					<div class="card">
+						<div class="card-body">
+							<h5 class="mt-3">Introduzca un nuevo ejercicio</h5>
+							<div class="row">
+								<div class="mt-2 col-6">
+									<label for="nombre">Nº Ejercicio</label> <input 
+									class="form-control"
+									type="number"
+										id="nombre" name="nombre" th:value="${ejercicio.nombre}"
+										required />
+								</div>
+								<div class="mt-2 col-6">
+									<label for="enunciado">Enunciado</label> <input type="text"
+										id="enunciado" name="enunciado"
+										th:value="${ejercicio.enunciado}" required />
+								</div>
+							</div>
+						</div>
+					</div>
+
+					<div class="card">
+						<div class="card-body">
+							<h5 class="mt-3">Inserte las respuestas</h5>
+							<div class="row">
+								<div class="mt-2 col-12">
+									<label for="respuesta0">Respuesta #1</label> <input type="text"
+										id="respuesta0" name="respuesta1"
+										class="form-control"
+										th:field="*{respuestas[0].enunciado}" required />
+								</div>
+								<div class="mt-2 col-12">
+									<label for="respuesta1">Respuesta #2</label> <input type="text"
+										id="respuesta1" name="respuesta2"
+										class="form-control"
+										th:field="*{respuestas[1].enunciado}" required />
+								</div>
+								<div class="mt-2 col-12">
+									<label for="respuesta2">Respuesta #3</label> <input type="text"
+										id="respuesta2" name="respuesta3"
+										class="form-control"
+										th:field="*{respuestas[2].enunciado}" required />
+								</div>
+								<div class="mt-2 col-12">
+									<label for="respuestaCorrecta">Selecciona la respuesta
+										correcta</label> <select class="form-control" th:field="*{respuestaCorrecta}"
+										name="respuestaCorrecta" id="respuestaCorrecta" required>
+										<option value=""></option>
+										<option value="0">Respuesta 1</option>
+										<option value="1">Respuesta 2</option>
+										<option value="2">Respuesta 3</option>
+									</select>
+								</div>
+							</div>
+						</div>
+					</div>
+					<button class="btn btn-success" type="reset">Limpiar</button>
+					<button class="btn btn-success" type="submit">Enviar</button>
+				</form>
+
+
+			</div>
+
+			<BR> <BR>
+
+		</div>
+
+		 
+		<footer th:insert="fragments/footer :: pie-pagina" class="footer"></footer>
+</body>
+</html>

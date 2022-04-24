@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+<meta charset="ISO-8859-1">
+<title>Ventana Alumno</title>
+
+ <th:block th:insert="fragments/recursos.html :: recursos"></th:block>
+</head>
+<body>
+
+<header th:insert="fragments/header.html :: header"></header>
+	<div class="container">
+	<br>
+ 
+	<br> 
+	<div class="col-auto     p-1 text-center">
+	  <h3><td th:text="${alumno.nombre}"></td> </h3>
+	  <img class="rounded mx-auto  "
+									th:src="@{/logos/{img}   (img=${alumno.imagen})}"
+									alt="Imagen alumno" width="50">
+		</div>							
+			 
+    
+      
+      	<td th:text="${ejercicio.nombre}"></td> 
+		<form th:action="@{/guardarAlumnoPlantilla}" method="post"
+			th:object="${alumno}" enctype="multipart/form-data">
+
+
+			<div class="mb-3">
+
+				<input type="hidden" th:field="*{id_alumno}">
+
+			</div>
+
+    
+			 
+			 
+			 
+			 
+				<div class="form-row">
+				 <div class="form-group col-md-4">
+						 <select
+							class="form-control" name="categoria"
+							th:field="*{plantilla.id_plantilla}" id="categoria" required>
+							<option value=""><b>Seleccione una plantilla para el alumno</b></option>
+							<option th:each="plantilla : ${plantillas}"
+								th:value="${plantilla.id_plantilla}"
+								th:text="${plantilla.nombre}"></option>
+						</select>
+						
+				</div>	
+					 <br>
+					 
+				<div class="form-group col-md-4">
+			 
+           
+			 
+						<input class="btn btn-primary" type="submit" value="Guardar">
+			 
+	           </div>	
+	          
+
+			</div>
+		
+
+		</form>
+<br>
+
+
+		<div class="card">
+			<h4 class="card-header">
+				<strong>Examenes asignados</strong>
+			</h4>
+			<div class="card-body">
+
+
+				<div th:if="${msg != null}" class='alert alert-success'
+					th:text="${msg}" role='alert'></div>
+				<table class="table table-hover">
+					<thead class="thead-light">
+						<tr>
+							 
+							<th>Nombre</th>
+							<th>Categor&iacutea</th>
+							<th>Detalles</th>
+						 
+							<th>Notas</th>
+						</tr>
+					</thead>
+					<tbody>
+						<tr th:each="plantilla:${plantillasAlumno}">
+
+
+
+							<td >
+							     	<a th:href="@{/hacerExamen/{id} (id=${plantilla.id_plantilla})}" ><span th:text="${plantilla.nombre}"></span></a>
+							</td>
+								 	 
+
+							<td th:text="${plantilla.categoria.nombre}"></td>
+							<td th:text="${plantilla.detalles}"></td>
+							 
+								
+									<td><a
+									th:href="@{/registroNotas/{id}/{id_plantilla} (id=${alumno.id_alumno},id_plantilla=${plantilla.id_plantilla})}"
+									class="btn btn-success btn-sm" role="button" title="Editar"><i
+										class="fas fa-binoculars" aria-hidden="true"></i></a>  </td>
+						</tr>
+						<tr>
+					</tbody>
+				</table>
+				
+			
+			</div>
+				
+			<!-- /cardBody -->
+		</div>
+		<!-- /card -->
+ 
+
+ 
+
+
+ 
+
+
+
+	</div>
+ <footer th:insert="fragments/footer :: pie-pagina" class="footer"></footer>
+</body>
+</html>
